@@ -1,27 +1,34 @@
+const { path } = require('@vuePress/utils')
+
 module.exports = {
   title: '笔记',
   description: '前端学习笔记',
+  plugins: [
+    [
+      '@vuepress/register-components',
+        {
+          componentsDir: path.resolve(__dirname, './components'),
+        },
+    ],
+  ],
   themeConfig: {
     navbar: [
-      { text: '首页', link: '/Regular/base' },
+      { text: '首页', link: '/JavaScriptNotes' },
     ],
     sidebar:{
-      '/Regular/': [
+      '/JavaScriptNotes/': [
         {
           children: [
-            {text: '正则', link: '/Regular/base'}
+            { text: '正则', link: '/JavaScriptNotes/regular' },
+            { text: '项目相关代码', link: '/JavaScriptNotes/work' },
+            { text: '知识点记载', link: '/JavaScriptNotes/newknowlage' },
+            { text: 'typeScript', link: '/JavaScriptNotes/ts' }
           ]
         }
       ],
-      '/accumulate/': [
-        {
-          children: [
-            { text: '日常项目积累笔记', link: '/accumulate/' },
-            { text: '项目经验', link: '/accumulate/work' },
-            { text: '知识记载', link: '/accumulate/newknowlage'}
-          ]
-        }
-      ]
-    }
-}
+    },
+  },
+  markdown: {
+    lineNumbers: true
+  }
 };
