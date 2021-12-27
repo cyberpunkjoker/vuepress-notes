@@ -131,7 +131,7 @@ function isApiError(error: Error) {
 - export as namespace UMD 库声明全局变量
 - declare global 扩展全局变量
 - declare module 扩展模块
-- /// <reference /> 三斜线指令
+- /// `<reference />` 三斜线指令
 :::details
 - 类似于声明文件中的 import，它可以用来导入另一个声明文件。
 - 三斜线的使用场景：（与 import 之间的区别）
