@@ -1,4 +1,4 @@
-const { path } = require('@vuePress/utils')
+const path = require('path');
 
 module.exports = {
   title: '笔记',
