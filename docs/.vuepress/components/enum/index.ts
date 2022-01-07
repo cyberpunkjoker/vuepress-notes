@@ -11,3 +11,14 @@ export enum WavParams {
   simpleRate = '采样率', 
   bitsPerSample = '单个采样位深',
 }
+
+/**
+ * 基础颜色配置
+ */
+export enum BaseColorType {
+  purple = '#404ED3',
+  yellow = '#fdbc40',
+  green = '#37cd4b',
+  red = '#fc625d',
+  blue = '#40a9ff',
+}
