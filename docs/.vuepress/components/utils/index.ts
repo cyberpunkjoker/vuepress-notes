@@ -56,6 +56,11 @@ export class WavHead {
     console.log('bits:', bits);
     return parseInt(bits);
   }
+}
 
- 
+
+// buffer 转 base64 函数
+export const arrayBufferToBase64Img = (buffer: ArrayBuffer):string => {
+  const str = String.fromCharCode(...new Uint8Array(buffer))
+  return `data:image/jpeg;base64,${window.btoa(str)}`
 }

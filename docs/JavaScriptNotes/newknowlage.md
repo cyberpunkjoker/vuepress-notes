@@ -1,6 +1,3 @@
----
-sidebarDepth: 2
----
 ## 异或
 
 
@@ -68,7 +65,6 @@ class WavHead {
         return type
     }
 }
-
 ```
 :::
 
@@ -77,8 +73,11 @@ class WavHead {
 ⚠️注意：只对wav格式音频起效哦～
 <upload />
 
-
 ##### 需求2: 怎么获取视频中的音频源
+首先需要明确一点，不同的视频格式文件的存储信息的位置是不同的，要去读文件还要依照文件的存储机制去读写才行。
+
+<tag name="遗留问题" colorType="red"></tag>
+校验方式：涉及知识点 => buffer 怎么转换成 audio 可以识别的录音
 
 
 ## ArrayBuffer 对象
@@ -90,6 +89,10 @@ class WavHead {
 <template #content_1>
 <strong>ArrayBuffer对象：</strong>
 代表内存之中的一段二进制数据，可以通过“视图”进行操作。“视图”部署了数组接口，这意味着，可以用数组的方法操作内存。它不能直接读写，只能通过视图（TypedArray视图和DataView视图)来读写，视图的作用是以指定格式解读二进制数据。
+
+```js
+const buf = new ArrayBuffer(32)
+```
 </template>
  
  <template #content_2>
@@ -98,8 +101,16 @@ class WavHead {
  1. **ArrayBuffer.prototype.byteLength** -> byteLength属性，返回所分配的内存区域的字节长度
  2. **ArrayBuffer.prototype.slice()** -> slice方法，允许将内存区域的一部分，拷贝生成一个新的ArrayBuffer对象。
  3. **ArrayBuffer.slice()** -> 静态方法isView，返回一个布尔值，表示参数是否为ArrayBuffer的视图实例。
+
+ ```js
+ const buffer = new ArrayBuffer(32);
+ buffer.byteLength // 32
+ const newBuffer = buffer.slice(0, 10); //截取0-10的位数
+ ArrayBuffer.isView(buffer) // false
+ ArrayBuffer.isView(new Int32Array(buffer)) // true -> 视图实例
+ ```
  
- **小结：** -> ArrayBuffer的基础方法只能截取字节长度，想要将其展示成可以看懂的还要使用，TypedArray视图和DataView视图来读写 -->
+ **小结：** -> ArrayBuffer的基础方法只能截取字节长度，想要将其展示成可以看懂的还要使用，TypedArray视图和DataView视图来读写
 </template>
 
 <template #content_3>
@@ -108,12 +119,176 @@ class WavHead {
  [TypedArray 视图](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/TypedArray'): -> 描述了一个底层的二进制数据缓冲区的一个类数组视图（。事实上，没有名为 TypedArray 的全局属性，也没有一个名为 TypedArray 的构造函数。
 
  [DataView 视图](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/DataView'): -> 视图是一个可以从 二进制ArrayBuffer 对象中读写多种数值类型的底层接口，使用它时，不用考虑不同平台的字节序问题。
-</template>
 
+ 字节序是是吗？后面要补充一下。
+</template>
 </knowledgeLine>
 
+### 利用视图读取ArrayBuffer
+#### TypedArray
+TypedArray 视图共有 9 种类型:
+- Int8Array：8 位有符号整数，长度 1 个字节。
+- Uint8Array：8 位无符号整数，长度 1 个字节。
+- Uint8ClampedArray：8 位无符号整数，长度 1 个字节，溢出处理不同。
+- Int16Array：16 位有符号整数，长度 2 个字节。
+- Uint16Array：16 位无符号整数，长度 2 个字节。
+- Int32Array：32 位有符号整数，长度 4 个字节。
+- Uint32Array：32 位无符号整数，长度 4 个字节。
+- Float32Array：32 位浮点数，长度 4 个字节。
+- Float64Array：64 位浮点数，长度 8 个字节。
 
-TypedArray && DataView 区别
+<tag name="注意点"/>
+
+1. 它们很像普通数组，都有length属性，都能用方括号运算符（[]）获取单个元素，所有数组的方法，在它们上面都能使用
+2. TypedArray 数组只是一层视图，本身不储存数据，它的数据都储存在底层的ArrayBuffer对象之中，要获取底层对象必须使用buffer属性。
+3. TypedArray 数组没有concat方法
+4. Uint8ClampedArray 的视图类型是一种针对 Canvas 元素的专有类型(专门针对颜色)。
+
+#### DataView
+1. 先将其转化成为 DataView 视图格式
+```js
+const buffer = new ArrayBuffer(24);
+const dv = new DataView(buffer);
+```
+2. `DataView` 实例提供 8 个方法读取(写入)内存。
+- get(set)Int8：读取(写入) 1 个字节，返回一个 8 位整数。
+- get(set)Uint8：读取(写入) 1 个字节，返回一个无符号的 8 位整数。
+- get(set)Int16：读取(写入) 2 个字节，返回一个 16 位整数。
+- get(set)Uint16：读取(写入) 2 个字节，返回一个无符号的 16 位整数。
+- get(set)Int32：读取(写入) 4 个字节，返回一个 32 位整数。
+- get(set)Uint32：读取(写入) 4 个字节，返回一个无符号的 32 位整数。
+- get(set)Float32：读取(写入) 4 个字节，返回一个 32 位浮点数。
+- get(set)Float64：读取(写入) 8 个字节，返回一个 64 位浮点数。
+
+### 操作实例
+1. 如何以 arrayBuffer 的形式获取远端文件：
+```js
+const { data } = await axios('远端地址xxxx', { responseType: 'blob'})
+const buffer = await data.arrayBuffer()
+```
+2. 当远端的 txt 文件出现乱码时：
+出现乱码的原因可能是因为：文件的编码方式不是 utf-8，所以要按照 utf-8 的形式读取文件。
+```js
+const res = await fetch('远端地址xxx')
+const blob = await res.blob()
+const reader = new FileReader()
+reader.onload = function(evt) {
+    console.log('解析后的值', evt.target.result);
+};
+reader.readAsText(blob)
+```
+3. 利用canvas来压缩图片 ！！
+
+起因：之前遇到过一个需求，上传图片要 前端 压缩至 xx kb以下。
+
+但是：前端如何实现图片压缩呢？查阅资料后发现可以使用 canvas 进行压缩
+
+:::details 实现详情如下
+1. 将上传的图片 以 base64 的形式读出来，赋值给 img 的 src 属性
+```ts
+// 方案一： 是有FileReader API 读文件
+const reader = new FileReader()
+reader.readAsDataURL(file)
+reader.onload = function(e: any) {
+    img.src = e.target.result as string
+}
+
+// 方案二: 自己转图片信息为 base64
+// arrayBuffer 转 Base64 的算法
+const arrayBufferToBase64Img = (buffer: ArrayBuffer):string => {
+  const str = String.fromCharCode(...new Uint8Array(buffer))
+  return `data:image/jpeg;base64,${window.btoa(str)}`
+}
+const buffer: ArrayBuffer = await file.arrayBuffer()
+img.src = arrayBufferToBase64Img(buffer)
+```
+2. 在图片加载完成后 获取图片信息，并使用 drawImage() 方法压缩
+```ts
+// 这里要注意一点，要把onload 事件封装成同步事件 ，否则获取不到压缩完成后的 blob
+const imgLoaded = (img: HTMLImageElement):Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+        img.onload = () => {
+            const originWidth = img.width
+            const originHeight = img.height
+            let targetWidth = Math.round(originWidth / 2),
+                targetHeight = Math.round(originHeight / 2);
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+            // 清除画布
+            ctx.clearRect(0, 0, targetWidth, targetWidth);
+            // 图片压缩
+            ctx.drawImage(img, 0, 0, targetWidth, targetWidth);
+            canvas.toBlob((blob) => {
+            resolve(blob)
+            }, file.type || 'image/png')
+        }
+    })
+}
+```
+3. 上诉两部其实已经完成了对图片的压缩功能，因为需求是 “压缩至20kb“，所以需要加入递归判断，图片小于 20kb就行。
+```ts
+interface ICompressProps {
+  file: File | Blob,
+  maxSize: number, //单位kb
+}
+// 压缩图片 函数 如下：⬇️
+const compressImg = async(props: ICompressProps) => {
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+
+  // 递归压缩
+  const loop = async (props: ICompressProps) => {
+    const {file, maxSize } = props
+    const outCondition = maxSize * 1024
+    if (file.size <= outCondition) return file
+    const img = new Image()
+    const buffer: ArrayBuffer = await file.arrayBuffer()
+    img.src = arrayBufferToBase64Img(buffer)
+ 
+    const imgLoaded = (img: HTMLImageElement):Promise<Blob> => {
+      return new Promise((resolve, reject) => {
+        img.onload = () => {
+          const originWidth = img.width
+          const originHeight = img.height
+          let targetWidth = Math.round(originWidth / 2),
+              targetHeight = Math.round(originHeight / 2);
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          // 清除画布
+          ctx.clearRect(0, 0, targetWidth, targetWidth);
+          // 图片压缩
+          ctx.drawImage(img, 0, 0, targetWidth, targetWidth);
+          // toBlob 函数这里有第二个参数要注意以下
+            // 如果没有文件类型，可能导致转化成了其它类型图片导致第一次压缩 文件反而变大
+          canvas.toBlob((blob) => {
+            resolve(blob)
+          }, file.type || 'image/png') 
+        }
+      })
+    }
+
+    const compressedBlob = await imgLoaded(img)
+    const params: ICompressProps = { file: compressedBlob, maxSize }
+    if (compressedBlob.size > outCondition) return loop(params)
+    return compressedBlob
+  }
+  
+  // 获取压缩后的 最终 Blob 对象
+  const blob = await loop(props)
+  // 获取压缩后的 最终 ArrayBuffer 对象
+  const bf = await blob.arrayBuffer()
+}
+```
+:::
+
+
+
+⬇️下例 Demo 会将 图片压缩至 20kb 及以下
+该方法 参考了 [张鑫旭大佬的博客](https://www.zhangxinxu.com/study/201707/js-compress-image-before-upload.html)
+<bufferDemo/>
+
+### TypedArray && DataView 区别
+ArrayBuffer对象的各种TypedArray视图，是用来向网卡、声卡之类的本机设备传送数据，所以使用本机的字节序就可以了；而DataView视图的设计目的，是用来处理网络设备传来的数据，所以大端字节序或小端字节序是可以自行设定的。
 
 ## webpack
 **关于 process**

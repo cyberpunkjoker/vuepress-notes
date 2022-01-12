@@ -1,7 +1,7 @@
 <template>
   <div class="know-line">
     <div class="desc">
-      <div>知识点描述</div>
+      <div>知识梳理模版</div>
     </div>
     <div class="line-item" :key="i.label" v-for="(i, idx) in lineList">
       <div :style="{minWidth: '65px'}">
@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, toRefs, computed, defineProps } from 'vue'
+import { defineComponent, reactive, toRefs } from 'vue'
 import { BaseColorType } from './enum/index'
 
 type ColorType = keyof typeof BaseColorType;
@@ -88,13 +88,12 @@ export default defineComponent({
   .desc {
     position: absolute;
     left: 20px;
-    top: -18px;
+    top: -16px;
     display: inline-block;
     font-weight: 700;
     font-size: 18px;
     background: var(--title-box-color);
     transform: skewX(-37deg);
-    
   }
   .desc>div {
     padding:0 10px;

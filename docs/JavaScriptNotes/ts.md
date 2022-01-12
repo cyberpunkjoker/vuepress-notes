@@ -182,7 +182,7 @@ class SecuityDoor extends Door implements Alarm {
   alert() { console.log('balala') }
 }
 
-class Car implementsAlarm {
+class Car implements Alarm {
   alert() { console.log('balala') }
 }
 // 同时 一个类也 支持 实现多个接口
