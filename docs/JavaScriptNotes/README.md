@@ -11,6 +11,7 @@
 2. 前端基础笔记记载
 - ts 学习笔记。 [typeScript](./ts.md)
 - 正则笔记记录。 [正则笔记必会](./regular.md)
+- canvas 学习。 [canvas](./canvas.md)
 
 3. 其它
 - 自己发现的一些有趣的项目记录。

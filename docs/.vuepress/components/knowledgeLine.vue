@@ -34,9 +34,9 @@ interface ILineProps {
 }
 
 export default defineComponent({
-  props: ['lineList', 'define', 'reason', 'todo', 'extend', 'boxColor'],
+  props: ['lineList', 'boxColor'],
   setup(props: ILineProps) {
-    const { lineList, define, reason, todo, extend, boxColor='purple'} = props
+    const { lineList, boxColor='purple'} = props
     const state = reactive({
       lineList: [],
       boxColor: BaseColorType[boxColor],
@@ -51,10 +51,10 @@ export default defineComponent({
       state.lineList = lineList
     } else {  //默认模版分支
       const defaultLine = [
-        { label: '原因', content: reason, color: 'yellow' },
-        { label: '定义', content: define, color: 'blue' },
-        { label: '使用', content: todo, color: 'green' },
-        { label: '扩展', content: extend, color: 'red'}
+        { label: '原因', color: 'yellow' },
+        { label: '定义', color: 'blue' },
+        { label: '使用', color: 'green' },
+        { label: '扩展', color: 'red'}
       ]
       state.lineList = defaultLine
     }

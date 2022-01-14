@@ -77,7 +77,10 @@ class WavHead {
 首先需要明确一点，不同的视频格式文件的存储信息的位置是不同的，要去读文件还要依照文件的存储机制去读写才行。
 
 <tag name="遗留问题" colorType="red"></tag>
-校验方式：涉及知识点 => buffer 怎么转换成 audio 可以识别的录音
+校验方式：涉及知识点 => 
+
+1. buffer 怎么转换成 audio 可以识别的录音
+2. 音频可视化怎么实现
 
 
 ## ArrayBuffer 对象
@@ -242,6 +245,7 @@ const compressImg = async(props: ICompressProps) => {
     const outCondition = maxSize * 1024
     if (file.size <= outCondition) return file
     const img = new Image()
+    
     const buffer: ArrayBuffer = await file.arrayBuffer()
     img.src = arrayBufferToBase64Img(buffer)
  
@@ -280,8 +284,6 @@ const compressImg = async(props: ICompressProps) => {
 }
 ```
 :::
-
-
 
 ⬇️下例 Demo 会将 图片压缩至 20kb 及以下
 该方法 参考了 [张鑫旭大佬的博客](https://www.zhangxinxu.com/study/201707/js-compress-image-before-upload.html)
