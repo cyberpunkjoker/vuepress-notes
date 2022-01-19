@@ -42,11 +42,11 @@ const compressImg = async(props: ICompressProps) => {
     if (file.size <= outCondition) return file
     const img = new Image()
     // 方案一： 是有FileReader API 读文件
-    // const reader = new FileReader()
-    // reader.readAsDataURL(file)
-    // reader.onload = function(e: any) {
-    //   img.src = e.target.result as string
-    // }
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = function(e: any) {
+      img.src = e.target.result as string
+    }
 
     // 方案二: 自己转图片信息为 base64
     const buffer: ArrayBuffer = await file.arrayBuffer()

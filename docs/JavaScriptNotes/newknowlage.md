@@ -73,7 +73,7 @@ class WavHead {
 ⚠️注意：只对wav格式音频起效哦～
 <upload />
 
-##### 需求2: 怎么获取视频中的音频源
+#### 需求2: 怎么获取视频中的音频源
 首先需要明确一点，不同的视频格式文件的存储信息的位置是不同的，要去读文件还要依照文件的存储机制去读写才行。
 
 <tag name="遗留问题" colorType="red"></tag>
@@ -81,6 +81,73 @@ class WavHead {
 
 1. buffer 怎么转换成 audio 可以识别的录音
 2. 音频可视化怎么实现
+<hr/>
+
+##### 音频可视化:
+[参考文章](https://zhuanlan.zhihu.com/p/84202126)
+
+**前置内容补充（需要提前掌握的内容如下）：**
+1. [webAudio](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Audio_API) 目的：如何获取音频数据。
+2. 可视化图形展示：两种方式 canvas or webGL。
+
+**实现步骤：**
+1. **是什么？**
+
+音频可视化：通过获取频率、波形和其他来自声源的数据，将其转换成图形或图像在屏幕上显示出来，再进行交互处理。
+
+2. **怎么实现？**
+
+流程图：（简单来说，就是取数据 + 映射数据两个过程）
+<img src="../asset/display/v2-155eb88e6b57e61c0cb84d18d3a27461_r.png"/>
+
+我们先把“取数据”这个问题解决，可以按以下5步操作。
+:::tip 如何取数据
+1. 创建 AudioContext
+作用是：关联音频输入，对音频进行解码、控制音频的播放暂停等基础操作
+```js
+const context = new(window.AudioContext || window.webkitAudioContext)();
+```
+2. 创建 AnalyserNode
+作用是：获取音频的频率数据（ FrequencyData ）和时域数据（ TimeDomainData ）。从而实现音频的可视化。
+```js
+const analyser = ctx.createAnalyser();
+analyser.fftSize = 512;
+// fftSize 的要求是 2 的幂次方，比如 256 、 512 等。数字越大，得到的结果越精细。
+// fftSize 决定了 frequencyData 的长度，具体为 fftSize 的一半。
+// fftSize range [32, 32768].
+```
+3. 设置 SourceNode
+将音频节点，关联到 AudioContext 上分析
+- MediaElementAudioSourceNode 允许将`<audio>`节点直接作为输入，可做到流式播放。(一般采用这种方式)
+- AudioBufferSourceNode 通过 xhr 预先将音频文件加载下来，再用 AudioContext 进行解码。
+- MediaStreamAudioSourceNode 可以将用户的麦克风作为输入。即通过navigator.getUserMedia获取用户的音频或视频流后，生成音频源。
+```js
+// 获取<audio>节点
+const audio = document.getElementById('audio');
+// 通过<audio>节点创建音频源
+const source = ctx.createMediaElementSource(audio);
+// 将音频源关联到分析器
+source.connect(analyser);
+// 将分析器关联到输出设备（耳机、扬声器）
+analyser.connect(ctx.destination);
+```
+4. 播放音频 `audio.play()`
+5. 获取 frequencyData
+```js
+const bufferLength = analyser.frequencyBinCount;
+const dataArray = new Uint8Array(bufferLength);
+
+analyser.getByteFrequencyData(dataArray);
+// 这里可以用两种方式处理:
+// -> analyser.getByteFrequencyData
+// -> analyser.getFloatFrequencyData
+// ---> 两者都是返回 TypedArray ，唯一的区别是精度不同。
+```
+:::
+
+**可视化方案：** 这里目前只了解了 canvas 所以只对 canvas 方案介绍
+<tag name='Demo⬇️' colorType="info"/>
+<audioView />
 
 
 ## ArrayBuffer 对象
@@ -198,6 +265,7 @@ reader.onload = function(e: any) {
 
 // 方案二: 自己转图片信息为 base64
 // arrayBuffer 转 Base64 的算法
+// --> 这么写是有问题的，太大的图片 第一步转arrayBuffer 的时候可能会栈溢出
 const arrayBufferToBase64Img = (buffer: ArrayBuffer):string => {
   const str = String.fromCharCode(...new Uint8Array(buffer))
   return `data:image/jpeg;base64,${window.btoa(str)}`

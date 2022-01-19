@@ -130,7 +130,7 @@ ctx.fill(circle);
 ```
 
 ### 使用样式和颜色
-canvas 设置图形的颜色
+#### canvas 设置图形的颜色
 1. 设置图形的填充色 - `fillStyle = color`
 2. 设置图形的轮廓色 - `strokeStyle = color`
 3. 透明色 - rgba
@@ -145,11 +145,217 @@ canvas 设置图形的颜色
   id="strokeStyleList"
 />
 
-线形样式
+#### 线形样式
 1. 设置线条宽度。`lineWidth = value`
 2. 设置线条末端样式。`lineCap = type` (butt，round 和 square。默认是 butt。)
 3. 设定线条与线条间接合处的样式。`lineJoin = type`(round, bevel 和 miter。默认是 miter。)
 4. 限制当两条线相交时交接处最大长度；所谓交接处长度（斜接长度）是指线条交接处内角顶点到外角顶点的长度。`miterLimit = value`
 5. 返回一个包含当前虚线样式，长度为非负偶数的数组。`getLineDash()`
-6. 设置当前虚线样式。`setLineDash(segments)`
+6. 设置当前虚线样式。`setLineDash(segments)`(虚线的间隔距离)
 7. 设置虚线样式的起始偏移量。`lineDashOffset = value`
+
+<tag name="注意红圈圈出来的部分" colorType="warn"/>
+
+<br />
+<canvasDemo 
+  type='drawSomeLine' 
+  title='线形样式相关'
+  w="520"
+  id="drawSomeLine"
+/>
+
+:::tip 注意⚠️
+1. miterLimit:  如上第三个所展示的上1 下1 的连接处 因为限制了最大长度是 10。所以不是完整的链接处展示方式。
+2. 虚线处的动画设置：
+```js
+const march = () => {
+  offset++;
+  if (offset > 16) {
+    offset = 0;
+  }
+  draw();
+  setTimeout(march, 20);
+}
+```
+:::
+
+### 渐变 && 图案
+`createLinearGradient(x1, y1, x2, y2)`: createLinearGradient 方法接受 4 个参数，表示渐变的起点 (x1,y1) 与终点 (x2,y2)。
+
+`createRadialGradient(x1, y1, r1, x2, y2, r2)`: createRadialGradient 方法接受 6 个参数，前三个定义一个以 (x1,y1) 为原点，半径为 r1 的圆，后三个参数则定义另一个以 (x2,y2) 为原点，半径为 r2 的圆。
+
+<canvasDemo 
+  type='drawGradients' 
+  title='渐变'
+  w="320"
+  id="drawGradients"
+/>
+
+**Patterns**
+`createPattern(image, type)`:
+该方法接受两个参数。Image 可以是一个 Image 对象的引用，或者另一个 canvas 对象。Type 必须是下面的字符串值之一：repeat，repeat-x，repeat-y 和 no-repeat。
+
+<canvasDemo 
+  type='drawPatterns' 
+  title='图案样式'
+  id="drawPatterns"
+/>
+
+:::tip 提示
+1. **渐变** 使用姿势：先创建渐变方式 `LinearGradient || RadialGradient` 然后使用 `addColorStop(百分比，颜色)` 分段创建 渐变颜色方式。
+
+2. **patterns:** 使用方式
+```js
+const img = new Image();
+img.src = 'https://mdn.mozillademos.org/files/222/Canvas_createpattern.png';
+img.onload = function() {
+    // 创建图案
+  var ptrn = ctx.createPattern(img, 'repeat');
+  ctx.fillStyle = ptrn;
+  ctx.fillRect(0, 0, 150, 150);
+}
+```
+:::
+
+### 文字相关
+#### 绘制文本
+`fillText(text, x, y [, maxWidth])`:
+在指定的(x,y)位置填充指定的文本，绘制的最大宽度是可选的.
+
+`strokeText(text, x, y [, maxWidth])`:
+在指定的(x,y)位置绘制文本边框，绘制的最大宽度是可选的.
+
+#### 文本样式
+`font = value`:
+当前我们用来绘制文本的样式. 这个字符串使用和 CSS font 属性相同的语法. 默认的字体是 10px sans-serif。
+
+`textAlign = value`:
+文本对齐选项. 可选的值包括：start, end, left, right or center. 默认值是 start。
+
+`textBaseline = value`:
+基线对齐选项. 可选的值包括：top, hanging, middle, alphabetic, ideographic, bottom。默认值是 alphabetic。
+
+`direction = value`:
+文本方向。可能的值包括：ltr, rtl, inherit。默认值是 inherit。
+
+#### 阴影 shadows
+`shadowOffsetX = float`:
+shadowOffsetX 和 shadowOffsetY 用来设定阴影在 X 和 Y 轴的延伸距离，它们是不受变换矩阵所影响的。负值表示阴影会往上或左延伸，正值则表示会往下或右延伸，它们默认都为 0。
+
+`shadowOffsetY = float`:
+shadowOffsetX 和 shadowOffsetY 用来设定阴影在 X 和 Y 轴的延伸距离，它们是不受变换矩阵所影响的。负值表示阴影会往上或左延伸，正值则表示会往下或右延伸，它们默认都为 0。
+
+`shadowBlur = float`:
+shadowBlur 用于设定阴影的模糊程度，其数值并不跟像素数量挂钩，也不受变换矩阵的影响，默认为 0。
+
+`shadowColor = color`:
+shadowColor 是标准的 CSS 颜色值，用于设定阴影颜色效果，默认是全透明的黑色。
+
+:::tip
+1. 绘制文本相关
+- 最大宽度会压缩文字，而不是分行。
+- strokeText 是文字边框，镂空样式
+2. 预测文本宽度
+`ctx.measureText("foo")`
+:::
+<canvasDemo 
+  type='drawSomeText'
+  w="300"
+  title='文字相关'
+  id="drawSomeText"
+/>
+
+### 使用图像
+**引入图像到canvas里需要以下两步基本操作：**
+1. 获得一个指向HTMLImageElement的对象或者另一个canvas元素的引用作为源，也可以通过提供一个URL的方式来使用图片
+2. 使用drawImage()函数将图片绘制到画布上
+- `drawImage(image, x, y)`:其中 image 是 image 或者 canvas 对象，x 和 y 是其在目标 canvas 里的起始坐标。
+
+**使用方式：**
+```js
+// 1. 创建一个图像
+var img = new Image();   // 创建一个<img>元素
+img.src = 'myImage.png'; // 设置图片源地址
+
+// 2. 当脚本执行后，图片开始装载
+img.onload = function(){
+  // 执行drawImage语句
+}
+```
+
+**drawImage**方法，可以传9个参数：
+drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+```js
+ctx.drawImage(remoteImg, 
+  33,71,104,124, // 前4个参数是对原图的裁剪， 位置（x,y）=> 33，71. 原图上的大小 => 104,124.
+  185,20, 87,104 // 裁剪之后的图片 位置 和 大小
+)
+```
+<canvasDemo 
+  type='drawPic'
+  title='绘制图片'
+  w="300"
+  id="drawPic"
+/>
+
+### 变形
+#### save && restore
+Canvas状态存储在栈中，每当save()方法被调用后，当前的状态就被推送到栈中保存。
+
+你可以调用任意多次 save方法。每一次调用 restore 方法，上一个保存的状态就从栈中弹出，所有设定都恢复。
+```js
+ctx.fillRect(0,0,150,150);
+ctx.save(); 
+
+ctx.fillStyle = '#09F'
+ctx.fillRect(15,15,120,120);
+
+ctx.save();
+ctx.fillStyle = '#FFF'
+ctx.globalAlpha = 0.5;
+ctx.fillRect(30,30,90,90);
+
+ctx.restore();
+ctx.fillRect(45,45,60,60);
+
+ctx.restore();
+ctx.fillRect(60,60,30,30);
+```
+<canvasDemo 
+  type='drawWithSave'
+  title='save && restore'
+  id="drawWithSave"
+/>
+
+#### translating
+用来移动 canvas 和它的原点到一个不同的位置。
+
+`translate(x, y)`: translate 方法接受两个参数。x 是左右偏移量，y 是上下偏移量。
+```js
+for (let i = 0; i < 3; i++) {
+  for (let j = 0; j < 3; j++) {
+    // 这里保存的是原始的 原点位置
+    ctx.save();
+    ctx.fillStyle = 'rgb(' + (51 * i) + ', ' + (255 - 51 * i) + ', 255)';
+    ctx.translate(10 + j * 50, 10 + i * 50);
+    ctx.fillRect(0, 0, 25, 25);
+    ctx.restore(); // 每循环一次就回复到 0，0 开始
+  }
+}
+```
+<canvasDemo 
+  type='drawTranslate'
+  title='translating'
+  id="drawTranslate"
+/>
+
+#### Rotating
+`rotate('角度')`: 它是顺时针方向的，以弧度为单位的值。旋转的中心点始终是 canvas 的原点。可以理解成以原点为圆心，弧度为坐标轴 顺时针方向旋转角度。以此为坐标轴 绘图。
+<canvasDemo 
+  type='drawRotating'
+  title='Rotating'
+  id="drawRotating"
+/>
+
+#### 缩放
+
