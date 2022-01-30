@@ -13,7 +13,7 @@
 - 正则笔记记录。 [正则笔记必会](./regular.md)
 - canvas 学习。 [canvas](./canvas.md)
 
-3. 其它
-- 自己发现的一些有趣的项目记录。
+3. 其它 - 一些有趣的项目研究
+- VueUse 代码研究。 [vueUse](./vueUse.md)
 
 :::

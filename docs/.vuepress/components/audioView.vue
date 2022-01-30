@@ -45,8 +45,8 @@ const onLoadAudio = () => {
     function renderFrame() {
       requestAnimationFrame(renderFrame);
 
-      analyser.getByteFrequencyData(dataArray);
-
+      // analyser.getByteFrequencyData(dataArray);
+      analyser.getByteTimeDomainData(dataArray);
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
       for (let i = 0, x = 0; i < bufferLength; i++) {
