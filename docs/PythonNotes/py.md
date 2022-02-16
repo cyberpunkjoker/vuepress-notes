@@ -12,5 +12,26 @@
 
 ### 迭代
 只要是可迭代对象，就可以使用 for 循环
+```python
+d = {'a': 1, 'b': 2, 'c': 3}
+# 1. 遍历key
+for k in d:
+# 2. 遍历value
+for v in d.values():
+# 3. 遍历key && value
+for k, v in d.items():
+```
 
-判断对象是否是可迭代？
+:::tip 问题集
+1. python 中如何实现下标迭代？
+2. 判断对象是否是可迭代？
+```python
+from collections.abc import Iterable
+isinstance('abc', Iterable) # str是否可迭代
+
+for i, value in enumerate(['A', 'B', 'C']):
+  pass
+```
+:::
+
+###

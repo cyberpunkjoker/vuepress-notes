@@ -14,6 +14,7 @@ module.exports = {
   themeConfig: {
     navbar: [
       { text: '首页', link: '/JavaScriptNotes' },
+      { text: 'python', link: '/PythonNotes' }
     ],
     displayAllHeaders: 2,
     // sidebar:{
