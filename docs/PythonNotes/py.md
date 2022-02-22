@@ -34,4 +34,20 @@ for i, value in enumerate(['A', 'B', 'C']):
 ```
 :::
 
-###
+### 列表生成式
+
+```python
+l_r = [x * x for x in range(1, 11) if x % 2 == 0]
+  # 结果：[4, 16, 36, 64, 100]
+
+l_e = [x if x % 2 == 0 else -x for x in range(1, 11)]
+  # 结果：[-1, 2, -3, 4, -5, 6, -7, 8, -9, 10]
+
+l_str = [m + n for m in 'ABC' for n in 'XYZ']
+  # 结果：['AX', 'AY', 'AZ', 'BX', 'BY', 'BZ', 'CX', 'CY', 'CZ']
+
+l_os = [d for d in os.listdir('.')]   # os.listdir可以列出文件和目录
+  # 结果：['node_modules', 'docs', '.gitignore', 'package-lock.json', 'package.json', '.git']
+```
+
+### 生成器

@@ -1,7 +1,8 @@
-# # encoding: utf-8
-# import math
-# from this import d
-# from collections.abc import Iterable
+# encoding: utf-8
+import math
+from this import d
+from collections.abc import Iterable
+import os
 
 # x_to_abs = abs(-100) #100
 # max_number = max(1,24,-100,239) #239
@@ -87,8 +88,28 @@
 
 # print(list(range(1, 11)))
 
-l_r = [x * x for x in range(1, 11) if x % 2 == 0]
-print(l_r)
+# l_r = [x * x for x in range(1, 11) if x % 2 == 0]
+# print(l_r)
 
-l_str = [m + n for m in 'ABC' for n in 'XYZ']
-print(l_str)
+# l_e = [x if x % 2 == 0 else -x for x in range(1, 11)]
+# print(l_e)
+
+# l_str = [m + n for m in 'ABC' for n in 'XYZ']
+# print(l_str)
+
+# l_os = [d for d in os.listdir('.')]   # os.listdir可以列出文件和目录
+# print(l_os)
+
+
+g = (x * x for x in range(10))
+# print(next(g))
+
+def fib(max):
+    n, a, b = 0, 0, 1
+    while n < max:
+        yield b
+        a, b = b, a + b
+        n = n + 1
+    return 'done'
+
+print(fib(10))
