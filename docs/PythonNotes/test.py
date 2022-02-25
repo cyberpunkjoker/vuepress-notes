@@ -112,4 +112,18 @@ def fib(max):
         n = n + 1
     return 'done'
 
-print(fib(10))
+# print(fib(10))
+
+
+# X = [0] + [1]
+# print(X) // [0, 1]
+
+# 杨辉三角形
+def triangles():
+    L = [1]
+    while True:
+        yield L
+        X = [0] + L
+        Y = L + [0]
+        L = [X[i] + Y[i] for i in range(len(X))]
+        print(X, Y, L)

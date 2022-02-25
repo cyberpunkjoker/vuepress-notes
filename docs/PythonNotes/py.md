@@ -11,6 +11,17 @@
 ```
 
 ### 迭代
+Iterable: 
+- 一类是集合数据类型，如list、tuple、dict、set、str等；
+- 一类是generator，包括生成器和带yield的generator function。
+
+生成器都是Iterator对象，但list、dict、str虽然是Iterable，却不是Iterator。
+可以使用iter()  => `iter([])` 变成 Iterator
+
+原因： 
+1. Python的Iterator对象表示的是一个数据流，Iterator对象可以被next()函数调用并不断返回下一个数据，直到没有数据时抛出StopIteration错误。
+2. Iterator甚至可以表示一个无限大的数据流，例如全体自然数。而使用list是永远不可能存储全体自然数的。
+
 只要是可迭代对象，就可以使用 for 循环
 ```python
 d = {'a': 1, 'b': 2, 'c': 3}
@@ -51,3 +62,17 @@ l_os = [d for d in os.listdir('.')]   # os.listdir可以列出文件和目录
 ```
 
 ### 生成器
+`yield`: 关键字处暂停 抛出，类似与js
+ 
+ Demo：使用 generator 实现杨辉三角形
+ ```python
+ # 错位相加前后补0 -> 实现
+ def triangles():
+    L = [1]
+    while True:
+        yield L
+        X = [0] + L
+        Y = L + [0]
+        L = [X[i] + Y[i] for i in range(len(X))]
+        print(X, Y, L)
+ ```
