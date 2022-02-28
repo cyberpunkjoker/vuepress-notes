@@ -1,3 +1,112 @@
+## python 学习
+#### 基础类型
+**整数：**
+
+**字符串：**
+字符串特殊处理：转译字符=>`\` 'I\'m \"OK\"'
+
+方法：
+- 获取字符的整数表示（`ord()`）
+- 编码转换成对应的字符（`chr()`）
+- 把 bytes 变成 str（`decode()`）
+- 字符串长度（`len()`）
+- - 当出现中文时：(需要指明编码方式)
+```py
+len('中午'.encode('utf-8'))
+```
+- 占位符
+- Python对 bytes 类型的数据用带 b 前缀的单引号或双引号表示
+
+**布尔值：**
+两个值： True || False
+
+运算方式：`与运算:and`、`或运算:or`、`非运算:(not)单目运算True=>False,False=>True`
+
+**空值：**
+None
+
+**List**
+- 追加元素到末尾 - append()
+- 插入元素到指定位置 - insert(idx, elm)
+- 删除末尾元素 - pop(idx) 传入索引删除对应索引元素
+
+```python
+userList = ['a', 'b', 'c']
+last = userList[-1]
+print(last)
+
+userList.append('ddd')
+userList.insert(1, 'jack')
+userList.pop(0)
+print(userList)
+```
+
+**tuple**
+元组，初始化后不可修改（引用对象可修改）
+
+**dict**
+在其它语言中也称为 map
+```python
+d = { 
+    'name': 'king', 
+    'age': 18, 
+    'gender': 'male',
+}
+if 'name' in d:
+    print(d['name'])
+print('key不存在则返回为 Null', d.get('nam'))
+```
+**set**
+一组key的集合，但不储存value，因为key不能重复，所以在set中没有重复的key
+- add(key) 添加
+- remove(key) 删除
+
+和js的差别之一是： set结构中不支持，List 和 Dict 结构
+
+#### 计算
+取整：`//`
+取余：`%`
+
+输入：input()
+输出：print()
+
+
+#### 条件判断
+```python
+user_heiht = 1.75
+user_weight = 80.5
+
+bmi_params = user_weight / ( user_heiht * user_heiht )
+print(bmi_params)
+if bmi_params < 18.5:
+    print('过轻')
+elif bmi_params < 25:
+    print('正常')
+elif bmi_params < 32:
+    print('过重')
+else:
+    print('严重')
+```
+
+#### 循环
+range(): 生成整数序列
+break: 跳出循环
+continue: 跳出本次循环，进入下次循环
+```python
+for values in range(101):
+    print(values)
+
+# while 循环
+sum = 0
+n = 99
+while n > 0:
+    sum += n
+    n = n-2
+print(sum)
+```
+
+
+
 ### 切片
 获取前N个元素 (Slice)
 字符串也可用该方法
@@ -80,6 +189,18 @@ l_os = [d for d in os.listdir('.')]   # os.listdir可以列出文件和目录
 ## 函数式编程
 
 ### 高阶函数
+- map & reduce:
+
+`map(fn, Iterator)`: 返回值是一个惰性序列，通过list()把整个序列计算出来返回一个list。
+
+`reduce(fn, Iterator)`: 类似js reduce, 返回累加结果。
+```python
+l_str = list(map(int, ['1','2','3',4,5,6]))   # 结果：[1,2,3,4,5,6,]
+
+def add(x, y):
+    return x + y
+sum = reduce(add, [1,2,3,4,5,6,7])   # 结果：28
+```
 
 - filter: 筛选过滤，返回 Iterator
 - sorted: 排序，可自定义 

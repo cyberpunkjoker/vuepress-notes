@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 # encoding: utf-8
 from cmath import log
 import math
