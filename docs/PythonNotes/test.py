@@ -1,8 +1,10 @@
 # encoding: utf-8
+from cmath import log
 import math
 from this import d
 from collections.abc import Iterable
 import os
+import functools
 
 # x_to_abs = abs(-100) #100
 # max_number = max(1,24,-100,239) #239
@@ -119,11 +121,45 @@ def fib(max):
 # print(X) // [0, 1]
 
 # 杨辉三角形
-def triangles():
-    L = [1]
-    while True:
-        yield L
-        X = [0] + L
-        Y = L + [0]
-        L = [X[i] + Y[i] for i in range(len(X))]
-        print(X, Y, L)
+# def triangles():
+#     L = [1]
+#     while True:
+#         yield L
+#         X = [0] + L
+#         Y = L + [0]
+#         L = [X[i] + Y[i] for i in range(len(X))]
+#         print(X, Y, L)
+
+
+def lazy_sum(*args):
+    def sum():
+        ax = 0
+        for n in args:
+            ax = ax + n
+        return ax
+    return sum
+
+print(lazy_sum(1,23,4,5)())
+
+# ########## 装饰器 ##########
+# def log(text):
+#   def decorator(func):
+#     @functools.wraps(func)
+#     def wrapper(*args, **kw):
+#       print(args, kw)
+#       print('%s %s():' % (text, func.__name__))
+#       if text == 'execute':
+#         return (args)
+#       return func(*args, **kw)
+#     return wrapper
+#   return decorator
+
+# @log('execute')
+# def now(*arg, **kw):
+#   return ('xxx-xxx', arg, kw)
+
+# print(now(1,2,3, ext = None))
+
+
+# *********** 偏函数
+int2 = functools.partial(int, base = 2)

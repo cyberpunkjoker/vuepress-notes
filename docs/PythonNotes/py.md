@@ -76,3 +76,58 @@ l_os = [d for d in os.listdir('.')]   # os.listdir可以列出文件和目录
         L = [X[i] + Y[i] for i in range(len(X))]
         print(X, Y, L)
  ```
+ 
+## 函数式编程
+
+### 高阶函数
+
+- filter: 筛选过滤，返回 Iterator
+- sorted: 排序，可自定义 
+  - `sort([], key=fn, reverse=True)` key：自定义规则函数，reverse：反向排序。
+
+#### 返回函数
+返回值也可是个函数：
+
+类似与 js ，
+返回闭包时牢记一点：返回函数不要引用任何循环变量，或者后续会发生变化的变量。
+
+闭包，就是内层函数引用了外层函数的局部变量。如果只是读外层变量的值。
+如果对外层变量赋值，由于Python解释器会把x当作函数fn()的局部变量，就会报错。
+
+#### 匿名函数
+关键字： lambda => lambda x: x * x
+
+#### 装饰器
+可以在不改变原有的函数体的基础下，增加新的逻辑进去。如下：⬇️
+```python
+def log(text):                     # 装饰器的传参
+  def decorator(func):
+    @functools.wraps(func)         # 需要把原始函数的__name__等属性复制到wrapper()函数中
+    def wrapper(*args, **kw):
+      print('%s %s():' % (text, func.__name__))
+      if text == 'execute': 
+        return (args)              # 满足该条件则走这里抛出
+      return func(*args, **kw)     # 也可以在这里完成对参数的筛选功能
+    return wrapper
+  return decorator
+
+@log('execute')
+def now(*arg, **kw):
+  return ('xxx-xxx', arg, kw)
+
+print(now(1,2,3, ext = None))
+```
+ #### 偏函数
+固定传入的参数，感觉就是做了一个闭包 `int2 = functools.partial(int, base = 2)` 
+
+
+### 模块
+作用域: 
+- 类似`_xxx`和`__xxx`这样的函数或变量就是非公开的（private）
+- 类似`__xxx__`这样的变量是特殊变量，可以被直接引用，但是有特殊用途
+
+第三方包安装
+pip 安装第三方包
+
+
+### 面向对象编程
