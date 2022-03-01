@@ -1,11 +1,16 @@
-<<<<<<< Updated upstream
 # encoding: utf-8
+from calendar import month
 from cmath import log
 import math
+from pprint import pprint
 from this import d
 from collections.abc import Iterable
 import os
 import functools
+
+import types
+
+from enum import Enum, unique
 
 # x_to_abs = abs(-100) #100
 # max_number = max(1,24,-100,239) #239
@@ -140,7 +145,7 @@ def lazy_sum(*args):
         return ax
     return sum
 
-print(lazy_sum(1,23,4,5)())
+# print(lazy_sum(1,23,4,5)())
 
 # ########## 装饰器 ##########
 # def log(text):
@@ -163,4 +168,108 @@ print(lazy_sum(1,23,4,5)())
 
 
 # *********** 偏函数
-int2 = functools.partial(int, base = 2)
+# int2 = functools.partial(int, base = 2)
+
+
+# class Student(object):
+#     __slots__ = ('name', 'age', 'get_info')
+
+# s = Student()
+
+# s.name = 'yahaha'
+# s.age = 18
+
+# def get_info(self):
+#     return print('name: %s, age: %s' % (self.name, self.age))
+
+# Student.get_info = get_info
+
+# s.get_info()
+
+class Student(object):
+    def __init__(self, name):
+        self.name = name
+    @property
+    def score(self):
+        return self._score
+
+    @score.setter
+    def score(self, value):
+        if not isinstance(value, int):
+            raise ValueError('score must be an integer!')
+        if value < 0 or value > 100:
+            raise ValueError('score must between 0 ~ 100!')
+        self._score = value
+
+    def __str__(self):
+        return 'Student object (name: %s)' % self.name
+
+    __repr__ = __str__
+# s = Student()
+# s.score = 600
+# print(s.score)
+
+# class Fib(object):
+#     def __init__(self):
+#         self.a, self.b = 0, 1 # 初始化两个计数器a，b
+
+#     def __iter__(self):
+#         return self # 实例本身就是迭代对象，故返回自己
+
+#     def __next__(self):
+#         self.a, self.b = self.b, self.a + self.b # 计算下一个值
+#         if self.a > 100000: # 退出循环的条件
+#             raise StopIteration()
+#         return self.a # 返回下一个值
+    
+#     def __getitem__(self, n):
+#         a, b = 1, 1
+#         for x in range(n):
+#             a, b = b, a + b
+#         return a
+
+#     def __getattr__(self, attr):
+#         if attr=='score':
+#             return 99
+# f = Fib()
+# for n in f:
+#     print(n)
+
+# print('2222', f[4])
+
+
+
+# class Chain(object):
+
+#     def __init__(self, path=''):
+#         self._path = path
+
+#     def __getattr__(self, path):
+#         return Chain('%s/%s' % (self._path, path))
+
+#     def __str__(self):
+#         return self._path
+
+#     __repr__ = __str__
+
+# print(Chain().status.user.timeline.list)  # /status/user/timeline/list
+
+
+month = Enum('Month', ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
+
+for name, member in month.__members__.items():
+    print(name, '=>', member, ',', member.value)
+
+
+@unique
+class Weekday(Enum):
+    Sun = 0
+    Mon = 1
+    Tue = 2
+    Wed = 3
+    Thu = 4
+    Fri = 5
+    Sat = 6
+
+print(Weekday.Mon)
+print(Weekday.Mon.value)

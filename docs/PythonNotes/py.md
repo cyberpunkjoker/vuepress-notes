@@ -201,7 +201,6 @@ def add(x, y):
     return x + y
 sum = reduce(add, [1,2,3,4,5,6,7])   # 结果：28
 ```
-
 - filter: 筛选过滤，返回 Iterator
 - sorted: 排序，可自定义 
   - `sort([], key=fn, reverse=True)` key：自定义规则函数，reverse：反向排序。
@@ -241,7 +240,6 @@ print(now(1,2,3, ext = None))
  #### 偏函数
 固定传入的参数，感觉就是做了一个闭包 `int2 = functools.partial(int, base = 2)` 
 
-
 ### 模块
 作用域: 
 - 类似`_xxx`和`__xxx`这样的函数或变量就是非公开的（private）
@@ -252,3 +250,224 @@ pip 安装第三方包
 
 
 ### 面向对象编程
+```python
+class Student(object):
+    pass
+
+bart = Student() # <__main__.Student object at xxxxxx> 指向实例
+print(bart)      # <class '__main__.Student'> 类
+
+```
+`__init__`: 特殊方法，在创建实例的时候，就把属性值绑上去。
+
+- __init__方法的第一个参数永远是self，表示创建的实例本身
+- __init__方法，在创建实例的时候，就不能传入空的参数了
+
+私有变量： => py中前面加有`__`的为私有变量，如：`__name`。
+
+```python
+class Student(object):
+    def __init__(self, name, score):
+        self.__name = name
+        self.__score = score
+
+    def get_grade(self):
+        if self.__score >= 90:
+            return 'A'
+        elif self.__score >= 60:
+            return 'B'
+        else:
+            return 'C'
+    
+    def print_score(self):
+        print('%s: %s' % (self.__name, self.__score))
+
+    # 获取私有变量的方法
+    def get_private(self, name):
+        d = {
+            'name': self.__name,
+            'score': self.__score
+        }
+        return d[name]
+
+bart = Student('hahaha', 45)
+```
+
+
+继承与多态：
+
+- 继承：子类可以继承父类的方法
+- 多态：同时子类父类存在相同的方法时，子类方法可以覆盖父类
+
+判断方法可用 `isinstance(dog, Animal)` 判断
+
+对于一个变量，我们只需要知道它是Animal类型，无需确切地知道它的子类型，就可以放心地调用run()方法
+
+继承可以把父类的所有功能都直接拿过来，这样就不必重零做起，子类只需要新增自己特有的方法，也可以把父类不适合的方法覆盖重写。
+```python
+class Animal(object):
+    def run(self):
+        print('Animal is running...')
+
+class Dog(Animal):
+    def run(self):
+        print('Dog is running...')
+
+dog = Dog()
+dog.run()
+```
+
+#### 类型判断
+1. 使用 type 判断：
+```python
+# 基本类型
+type(123)==int
+type('abc')==str
+
+# 函数类型
+import types
+def fn():
+  pass
+type(fn) == types.FunctionType
+type(abs)==types.BuiltinFunctionType
+type(lambda x: x)==types.LambdaType
+type((x for x in range(10)))==types.GeneratorType
+```
+2. 使用 isinstance 判断：
+
+如何获取一个对象的所有属性和方法 ———— `dir()`
+```python
+# 测试该对象的属性
+# ## 也可以获得对象的方法
+setattr(obj, 'y', 19)       # 设置一个属性'y'
+hasattr(obj, 'y')           # 有属性'y'吗？
+getattr(obj, 'y', 404)      # 获取属性'y', 没有返回 404 默认值
+```
+
+#### __slots__
+1. python 中可以给实例绑定方法：
+```python
+from types import MethodType
+s.set_age = MethodType(set_age, s) # 给实例绑定一个方法
+```
+2. 也可以直接给class 绑定方法
+```python
+Student.set_score = set_score
+```
+3. 同样也可以限制实例的属性
+注：若子类中也定义__slots__，子类实例允许定义的属性就是自身的__slots__加上父类的__slots__
+```python
+class Student(object):
+    __slots__ = ('name', 'age', 'get_info')
+s = Student()
+
+s.name = 'yahaha'
+s.age = 18
+
+def get_info(self):
+    return print('name: %s, age: %s' % (self.name, self.age))
+
+Student.get_info = get_info
+
+s.get_info()  # name: yahaha, age: 18
+s.score = 110 # 报错：'Student' object has no attribute 'score'
+```
+4. 简化类中的 set && get 操作
+```python
+class Student(object):
+    @property
+    def score(self):
+        return self._score
+
+    @score.setter
+    def score(self, value):
+        if not isinstance(value, int):
+            raise ValueError('score must be an integer!')
+        if value < 0 or value > 100:
+            raise ValueError('score must between 0 ~ 100!')
+        self._score = value
+s = Student()
+s.score = 600
+print(s.score)
+```
+5. 多重继承
+```python
+# MixIn
+class Bat(Mammal, Flyable):
+    pass
+```
+6. 定制类
+- `__str__`: 自定义打印值
+- `__repr__`: 同上
+- `__iter__` && `__next__` && `__getitem__`: 使类可用for ... in循环，next 拿到循环的下一个值，getitem 像list一样获取某一项的值（手动实现）
+- `__getattr__`: 尝试获得属性, 只有在没有找到属性的情况下，才调用__getattr__，已有的属性，不会在
+__getattr__中查找。
+- `__call__`: 直接对实例进行调用===>s() ,也可用callable()判断是否可调。
+```python
+class Fib(object):
+    def __init__(self):
+        self.a, self.b = 0, 1 # 初始化两个计数器a，b
+
+    def __iter__(self):
+        return self # 实例本身就是迭代对象，故返回自己
+
+    def __next__(self):
+        self.a, self.b = self.b, self.a + self.b # 计算下一个值
+        if self.a > 100000: # 退出循环的条件
+            raise StopIteration()
+        return self.a # 返回下一个值
+    
+    def __getitem__(self, n):
+        a, b = 1, 1
+        for x in range(n):
+            a, b = b, a + b
+        return a
+
+    def __getattr__(self, attr):
+        if attr=='score':
+            return 99
+
+    def __call__(self):
+        print('My name is %s.' % self.name)
+
+f = Fib()
+f()
+for n in f:
+    print(n)
+```
+
+**`__getattr__`: 还可以用来链式调用**
+可以用来链式调用 API
+```python
+class Chain(object):
+
+    def __init__(self, path=''):
+        self._path = path
+
+    def __getattr__(self, path):
+        return Chain('%s/%s' % (self._path, path))
+
+    def __str__(self):
+        return self._path
+
+    __repr__ = __str__
+
+print(Chain().status.user.timeline.list)  # /status/user/timeline/list
+```
+
+#### 枚举
+两种方式：
+```python
+# 1.
+month = Enum('Month', ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
+# 2.
+@unique  # 用来确定唯一性
+class Weekday(Enum):
+    Sun = 0
+    Mon = 1
+    Tue = 2
+    Wed = 3
+    Thu = 4
+    Fri = 5
+    Sat = 6
+```
