@@ -1,5 +1,6 @@
 # encoding: utf-8
 from calendar import month
+from cgitb import reset
 from cmath import log
 import math
 from pprint import pprint
@@ -11,7 +12,12 @@ import functools
 import types
 
 from enum import Enum, unique
+import logging
 
+import pickle
+
+import json
+from multiprocessing import Process
 # x_to_abs = abs(-100) #100
 # max_number = max(1,24,-100,239) #239
 
@@ -255,21 +261,120 @@ class Student(object):
 # print(Chain().status.user.timeline.list)  # /status/user/timeline/list
 
 
-month = Enum('Month', ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
+# month = Enum('Month', ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
 
-for name, member in month.__members__.items():
-    print(name, '=>', member, ',', member.value)
+# for name, member in month.__members__.items():
+#     print(name, '=>', member, ',', member.value)
 
 
-@unique
-class Weekday(Enum):
-    Sun = 0
-    Mon = 1
-    Tue = 2
-    Wed = 3
-    Thu = 4
-    Fri = 5
-    Sat = 6
+# @unique
+# class Weekday(Enum):
+#     Sun = 0
+#     Mon = 1
+#     Tue = 2
+#     Wed = 3
+#     Thu = 4
+#     Fri = 5
+#     Sat = 6
 
-print(Weekday.Mon)
-print(Weekday.Mon.value)
+# print(Weekday.Mon)
+# print(Weekday.Mon.value)
+
+
+# class Hello(object):
+#     def hello(self, name="world"):
+#         print('Hello, %s' % name)
+
+# print(type(Hello))
+
+
+def fn(self, name="world"):
+    print('Hello, %s' % name)
+
+Hello = type('Hello', (object,), dict(hello=fn))
+
+h = Hello()
+# h.hello()
+
+
+# def foo(s):
+#     return 10 / int(s)
+
+# def bar(s):
+#     return foo(s) * 2
+
+# def main():
+#     try:
+#         bar('0')
+#     except Exception as e:
+#         logging.exception(e)
+#         raise
+#     finally:
+#         print('finally...')
+
+# main()
+
+# s = '0'
+# n = int(s)
+# logging.basicConfig(
+#     level=logging.DEBUG,
+#     filename="test.log",
+#     datefmt="%Y-%m-%d %H:%M:%S",
+#     format="【%(asctime)s %(levelname)s】 %(lineno)d: %(message)s"
+# )
+# logging.debug("debug")
+# print(10 / n)
+
+
+# ################# 文件的读写
+# 自动帮我们调用close()
+# with open('/Users/ext.renzhiwei1/test-code/vuePress/docs/PythonNotes/test.txt', 'a') as f:
+    # print(f.read(1024))  # 限制读取内容的大小
+    # print(f.readline())  # 调用readline()可以每次读取一行内容，调用readlines()一次读取所有内容并按行返回list
+    # f.write('write something3333')
+    
+
+# print(os.uname())
+# print(os.environ)
+# print(os.environ.get('PATH'))
+
+
+# print(os.path.abspath('.')) # 查看当前目录的绝对路径
+# os.path.join('a', 'b')   # 合并两个路径
+
+# 序列化
+# d = dict(name="Bob", age=10, score=88)
+# with open('dump.txt', 'wb') as f:
+#     pickle.dump(d, f)
+# # 反序列化
+# with open('dump.txt', 'rb') as f:
+#     d = pickle.load(f)
+#     print(d)
+
+
+
+# d = {
+#     'name': 'dssd',
+#     'is_valid': True,
+#     'ca': 65.5,
+#     'info': {
+#         'a': 'wewe',
+#         'b': 123
+#     }
+# }
+
+# rest = json.dumps(d, indent=3)
+# print(rest)
+
+# data = json.loads(rest)
+# print(data)
+
+
+print('Process (%s) start...' % os.getpid())
+# Only works on Unix/Linux/Mac:
+# pid = os.fork()
+# if pid == 0:
+#     print('I am child process (%s) and my parent is %s.' % (os.getpid(), os.getppid()))
+# else:
+#     print('I (%s) just created a child process (%s).' % (os.getpid(), pid))
+

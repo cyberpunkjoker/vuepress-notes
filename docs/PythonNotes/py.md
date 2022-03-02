@@ -471,3 +471,159 @@ class Weekday(Enum):
     Fri = 5
     Sat = 6
 ```
+#### 元类
+**动态创建类**
+```python
+Hello = type('Hello', (object,), dict(hello=fn))
+```
+参数如下：
+1. class的名称；
+2. 继承的父类集合，注意Python支持多重继承，如果只有一个父类，别忘了tuple的单元素写法；
+3. class的方法名称与函数绑定，这里我们把函数fn绑定到方法名hello上。
+
+**metaclass**
+
+### 错误处理
+[错误类型](https://docs.python.org/3/library/exceptions.html#exception-hierarchy)
+
+抛错，不需要在每个可能出错的地方去捕获错误，只要在合适的层次去捕获错误就可以了
+如下： ⬇️
+```python
+import logging
+
+def foo(s):
+    return 10 / int(s)
+
+def bar(s):
+    return foo(s) * 2
+
+def main():
+    try:
+        bar('0')
+    except Exception as e:
+       logging.exception(e)
+        raise
+    finally:
+        print('finally...')
+```
+
+#### 调试
+1. 断言
+`assert n != 0, 'n is zero!'`: 表达式n != 0应该是True，否则，根据程序运行的逻辑，后面的代码肯定会出错。(则打印出后面的信息)
+2. logging
+将错误信息打印到txt文本中
+```python
+import logging
+
+s = '0'
+n = int(s)
+logging.basicConfig(
+    level=logging.DEBUG,
+    filename="test.log",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    format="【%(asctime)s %(levelname)s】 %(lineno)d: %(message)s"
+)
+logging.debug("debug")
+logging.info("info")
+logging.warning("warning")
+logging.error("error")
+print(10 / n)
+```
+
+**编写测试单元**（先略）
+
+**文档测试**
+
+
+## IO编程
+1. 读文件
+```python
+# 自动帮我们调用close()
+with open('xxxx路径', 'r') as f:
+    # print(f.read(1024))  # 限制读取内容的大小
+    # print(f.readline())  # 调用readline()可以每次读取一行内容，调用readlines()一次读取所有内容并按行返回list
+```
+read 方法返回的对象，称为 => file-like Object。
+- 二进制文件， open('xxx', 'rb')
+- 字符编码，open('xxx', 'r', encoding='gbk', errors='ignore')
+ - errors='ignore': 忽略错误编码
+
+2. 写文件
+```python
+with open('/Users/michael/test.txt', 'w') as f:
+    f.write('Hello, world!')
+```
+传入值为`w`, 会覆盖已有文件，传入值若为 `a`, 则是在文件后面继续添加
+
+#### StringIO和BytesIO
+很多时候，数据读写不一定是文件，也可以在内存中读写。
+```python
+from io import StringIO, BytesIO
+f = StringIO()
+f.write('hello')
+
+f2 = BytesIO()
+f2.write('中文'.encode('utf-8'))
+
+
+# os一点相关的内容
+os.uname()
+os.environ
+os.environ.get('PATH')
+
+#### 这两个有用
+os.path.abspath('.')    # 查看当前目录的绝对路径
+os.path.join('a', 'b')   # 合并两个路径
+```
+
+#### 序列化
+我们把变量从内存中变成可存储或传输的过程称之为序列化
+
+把变量内容从序列化的对象重新读到内存里称之为反序列化
+```python
+# 序列化
+d = dict(name="Bob", age=10, score=88)
+with open('dump.txt', 'wb') as f:
+    pickle.dump(d, f)
+# 反序列化
+with open('dump.txt', 'rb') as f:
+    d = pickle.load(f)
+```
+JSON 转化
+```python
+d = {
+    'name': 'dssd',
+    'is_valid': True,
+    'ca': 65.5,
+    'info': {
+        'a': 'wewe',
+        'b': 123
+    }
+}
+rest = json.dumps(d, indent=3)
+data = json.loads(rest)
+```
+
+### 进程和线程
+一个进程中可以有多个线程，它们共享这个进程的资源
+
+#### 多进程
+
+fork(): 适用于Unix/Linux操作系统
+兼容 windows => `multiprocessing`:
+
+
+
+
+
+
+
+
+
+
+
+
+## python 遗留问题
+TODO：
+1. py 项目如何包管理
+2. py 如何导入自己的其它模块
