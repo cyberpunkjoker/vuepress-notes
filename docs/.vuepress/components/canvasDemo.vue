@@ -1,6 +1,6 @@
 <template>
   <div class="canvas-box">
-  <div class="canvas-title">{{state.title}}-Demo: </div>
+    <div class="canvas-title">{{state.title}}-Demo: </div>
     <canvas :id="state.id" :height="state.h" :width="state.w"></canvas>
   </div>
 </template>
@@ -33,7 +33,7 @@ const draw = () => {
   const ctx = canvas.getContext('2d')
   canvasFn[FuncType](ctx)
 }
-
+  
 </script>
 
 <style lang="less" scoped>

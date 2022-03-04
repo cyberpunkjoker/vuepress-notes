@@ -31,4 +31,32 @@ fun(undefined) // undefined
 fun('wewe')    // wewe
 ```
 
+2. 加载网络图片使用 onload 不触发
+（缓存问题）解决方案, 怎么判断图片是否有缓存。
+```js
+// 同步加载图片
+export function loadImage(src) {
+  return new Promise(resolve => {
+    const img = new Image()
+    img.src = src
+    img.style.display = 'none'
+    document.body.appendChild(img)
+
+    resolveImg(img, () => {
+      document.body.removeChild(img)
+      resolve(img)
+    })
+  })
+}
+
+// 判断图片是否加载完成
+function resolveImg(img, callback) {
+  if (img.complete) {
+    callback()
+  } else {
+    setTimeout(() => resolveImg(img, callback), 50)
+  }
+}
+```
+
 

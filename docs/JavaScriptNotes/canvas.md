@@ -358,8 +358,59 @@ for (let i = 0; i < 3; i++) {
 />
 
 #### 缩放
+`scale(x, y)`: x 为水平缩放因子，y 为垂直缩放因子，如果比1小，会缩小图形， 如果比1大会放大图形
+<canvasDemo 
+  type='drawScale'
+  title='Scale'
+  id="drawScale"
+/>
 
+#### transforms
+`transform(a, b, c, d, e, f)`： ⬇️
+a(m11)：水平方向的缩放
+b(m12)：竖直方向的倾斜偏移
+c(m21)：水平方向的倾斜偏移
+d(m22)：竖直方向的缩放
+e(dx)：水平方向的移动
+f(dy)：竖直方向的移动
+<canvasDemo 
+  type='drawTransforms'
+  title='transforms'
+  id="drawTransforms"
+  w="300"
+  h="300"
+/>
 
+### 组合 Compositing
+重叠图像渲染方式
+globalCompositeOperation = '覆盖方式参数'
+#### 裁切路径 
+clip()：感觉和 globalCompositeOperation 的 source-in 和 source-atop 差不多。
+<canvasDemo 
+  type='drawClip'
+  title='clip'
+  id="drawClip"
+/>
+
+### 动画
+一定要善用 save 和 restore 存储恢复最初的坐标系状态，这样就不用手动恢复了
+
+**一些demo联系**
+<canvasDemo 
+  type='drawSolar'
+  title='solar'
+  id="drawSolar"
+  w='300'
+  h='300'
+/>
+
+<canvasDemo 
+  type='drawClock'
+  title='clock'
+  id="drawClock"
+  w='300'
+  h='300'
+/>
 
 ### Demo
 

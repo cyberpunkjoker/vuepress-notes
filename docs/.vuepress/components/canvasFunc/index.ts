@@ -1,5 +1,6 @@
 import dlamPic from '../../asset/v2-3f5ddc2367c78d252d1a963843100c1e_r.jpeg'
-
+import avatar from '../../asset/defaultAvatar.png'
+import canvasApi from "./animation"
 
 const drawSimleFace = (ctx: CanvasRenderingContext2D) => {
   ctx.beginPath();
@@ -165,7 +166,6 @@ const drawGradients = (ctx: CanvasRenderingContext2D) => {
   ctx.fillRect(100,0,200,200);
 }
 
-
 const drawPatterns = (ctx: CanvasRenderingContext2D) => {
   const img = new Image();
   img.src = 'https://mdn.mozillademos.org/files/222/Canvas_createpattern.png';
@@ -278,10 +278,50 @@ const drawRotating = (ctx:CanvasRenderingContext2D) => {
 
     ctx.restore();
   }
+}
 
+const drawScale = (ctx: CanvasRenderingContext2D) => {
+  const img = new Image();
+  img.onload = () => {
+    // 缩小
+    ctx.scale(0.5, 0.5)
+    ctx.drawImage(img, 0, 0)
+    // 放大
+    ctx.scale(2, 2)
+    ctx.drawImage(img, 30, 30)
+  }
+  img.src = avatar
+}
+
+const drawTransforms = (ctx: CanvasRenderingContext2D) => {
+  var sin = Math.sin(Math.PI/6);
+  var cos = Math.cos(Math.PI/6);
+  ctx.translate(100, 100);
+  var c = 0;
+  for (var i=0; i <= 12; i++) {
+    c = Math.floor(255 / 12 * i);
+    ctx.fillStyle = "rgb(" + c + "," + c + "," + c + ")";
+    ctx.fillRect(0, 0, 100, 10);
+    ctx.transform(cos, sin, -sin, cos, 0, 0);
+  }
+  ctx.setTransform(-1, 0, 0, 1, 100, 100);
+  ctx.fillStyle = "rgba(255, 128, 255, 0.5)";
+  ctx.fillRect(0, 50, 100, 100);
+}
+
+const drawClip = (ctx: CanvasRenderingContext2D) => {
+  ctx.fillRect(0,0,100,100);
+  ctx.translate(75,75);
+  ctx.arc(0,0,60,0,Math.PI*2,true);
+  ctx.clip();
+
+  ctx.fillStyle = 'pink';
+  ctx.fillRect(-75,-75,150,150);
+ 
 }
 
 export default {
+  // 基础绘制api学习
   drawSimleFace,
   drawBezier,
   drawCubicBezier,
@@ -294,5 +334,10 @@ export default {
   drawPic,
   drawWithSave,
   drawTranslate,
-  drawRotating
+  drawRotating,
+  drawScale,
+  drawTransforms,
+  drawClip,
+  // 动画相关
+  ...canvasApi,
 }
