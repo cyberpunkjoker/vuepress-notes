@@ -612,14 +612,37 @@ data = json.loads(rest)
 fork(): 适用于Unix/Linux操作系统
 兼容 windows => `multiprocessing`:
 
+创建子进程
+Pool
+同时运行的 进程个数是根据cup 核数来的。
+
+子进程的输入输出：
+输出：
+subprocess.call(['nslookup', 'www.python.org'])
+
+输入：
+p = subprocess.Popen(['nslookup'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+p.communicate(b'set q=mx\npython.org\nexit\n')
+
+进程之间的通信：
+
+
+
+在Unix/Linux下，可以使用fork()调用实现多进程。
+
+要实现跨平台的多进程，可以使用multiprocessing模块。
+
+进程间通信是通过Queue、Pipes等实现的。
 
 
 
 
 
 
+#### 多线程
+Python的threading模块有个current_thread()函数，它永远返回当前线程的实例
 
-
+多线程和多进程最大的不同在于，多进程中，同一个变量，各自有一份拷贝存在于每个进程中，互不影响，而多线程中，所有变量都由所有线程共享，所以，任何一个变量都可以被任何一个线程修改，因此，线程之间共享数据最大的危险在于多个线程同时改一个变量，把内容给改乱了。
 
 
 

@@ -59,4 +59,4 @@ function resolveImg(img, callback) {
 }
 ```
 
-
+3. 

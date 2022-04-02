@@ -393,9 +393,30 @@ clip()：感觉和 globalCompositeOperation 的 source-in 和 source-atop 差不
 />
 
 ### 动画
-一定要善用 save 和 restore 存储恢复最初的坐标系状态，这样就不用手动恢复了
-
-**一些demo联系**
+:::tip 问题记载
+1. 绘图时记住 坐标轴为 => `x轴向右为正，y轴向下为正`
+2. 一定要善用 save 和 restore 存储恢复最初的坐标系状态，这样就不用手动恢复了
+3. 写动画的时候可以使用class
+```js
+//  这里用了一个对象来存储状态
+const ball = {
+  x: 100,
+  y: 100,
+  vx: 9,
+  vy: 3,
+  radius: 25,
+  color: 'blue',
+  draw: function() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true)
+    ctx.closePath();
+    ctx.fillStyle = this.color;
+    ctx.fill()
+  }
+}
+```
+:::
+**一些demo练习**
 <canvasDemo 
   type='drawSolar'
   title='solar'
@@ -408,9 +429,29 @@ clip()：感觉和 globalCompositeOperation 的 source-in 和 source-atop 差不
   type='drawClock'
   title='clock'
   id="drawClock"
-  w='300'
-  h='300'
 />
 
-### Demo
+<canvasDemo 
+  type='drawABall'
+  title='ball-animation'
+  id="drawABall"
+  w="600"
+  h="400"
+/>
 
+
+### 像素操作
+- `createImageData`
+- `getImageData(left, top, width, height)`
+- `drawImage(img, w, h)`
+- `putImageData(myImageData, dx, dy)`
+- `imageSmoothingEnabled` -> 反锯齿(这个是让图片像素无锯齿的，旋转还是会有锯齿)
+- `canvas.toDataURL('image/jpeg', quality)` -> 保存图片，并设置图片质量
+
+### Demo
+**问题：**
+
+我们平时会在哪些地方使用到canvas呢？
+1. 绘制图片，修改图片
+2. 游戏制作
+3. 操作视频

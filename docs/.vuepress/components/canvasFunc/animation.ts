@@ -1,7 +1,6 @@
 /**
  * canvas 绘制动画函数
  */
-
 // 太阳系动画 —— MDN教程
 const drawSolar = (ctx: CanvasRenderingContext2D) => {
   var sun = new Image();
@@ -54,6 +53,7 @@ const drawSolar = (ctx: CanvasRenderingContext2D) => {
   init();
 }
 
+// 钟表绘制
 const drawClock = (ctx: CanvasRenderingContext2D) => {
   const w = 150    // 画布宽度
   const cR = w / 2 // 🕙半径
@@ -67,10 +67,6 @@ const drawClock = (ctx: CanvasRenderingContext2D) => {
   ctx.save()
   ctx.clearRect(0, 0, w, w)
   ctx.translate(cR + bW, cR + bW)    // 原点位置
-  ctx.arc(0, 0, cR, 0, Math.PI * 2); // 绘制
-  ctx.lineWidth = bW
-  ctx.strokeStyle = '#325FA2'
-  // ctx.stroke();
 
   ctx.save()
   ctx.strokeStyle = '#000'
@@ -80,26 +76,29 @@ const drawClock = (ctx: CanvasRenderingContext2D) => {
     ctx.rotate(Math.PI/30);
     if ( (i + 1) % 5 === 0) {
       ctx.lineWidth = 2
-      ctx.moveTo(cR - 15,0);
-      ctx.lineTo(cR - 25,0);
-    }else {
+      ctx.moveTo(cR - 15, 0);
+      ctx.lineTo(cR - 25, 0);
+    } else {
       ctx.lineWidth = 1
-      ctx.moveTo(cR - 15,0);
-      ctx.lineTo(cR - 20,0);
+      ctx.moveTo(cR - 15, 0);
+      ctx.lineTo(cR - 20, 0);
     }
     ctx.stroke();
   }
 
   ctx.restore()
 
+  ctx.lineCap = 'round'
+
   // 秒针
   ctx.save()
   ctx.lineWidth = 2
+  ctx.stroke()
   ctx.rotate(Math.PI/30 * sec)
   ctx.strokeStyle = '#D40000'
   ctx.beginPath()
-  ctx.moveTo(0,0)
-  ctx.lineTo(50,0)
+  ctx.moveTo(0,5)
+  ctx.lineTo(0,-50)
   ctx.stroke()
   ctx.restore()
 
@@ -109,30 +108,84 @@ const drawClock = (ctx: CanvasRenderingContext2D) => {
   ctx.rotate(Math.PI/30 * min)
   ctx.strokeStyle = '#000'
   ctx.beginPath()
-  ctx.moveTo(0,0)
-  ctx.lineTo(40,0)
+  ctx.moveTo(0,5)
+  ctx.lineTo(0,-40)
   ctx.stroke()
   ctx.restore()
 
   // 时针
-  const hour = hr > 12 ? hr-1 : hr
+  const hour = hr >= 12 ? hr - 12 : hr
+  
   ctx.save()
   ctx.lineWidth = 5
-  ctx.rotate(Math.PI/30 * hour )
+  ctx.rotate(hr*(Math.PI/6) + (Math.PI/360)*min + (Math.PI/21600)*sec)
   ctx.strokeStyle = '#000'
   ctx.beginPath()
-  ctx.moveTo(0,0)
-  ctx.lineTo(20,0)
+  ctx.moveTo(0,5)
+  ctx.lineTo(0,-20)
   ctx.stroke()
   ctx.restore()
 
   ctx.restore()
+  window.requestAnimationFrame((e) => {
+    drawClock(ctx)
+  })
 
-  window.requestAnimationFrame(() => drawClock(ctx))
+}
 
+// 绘制小球
+const drawABall = (ctx: CanvasRenderingContext2D) => {
+  const w = 600
+  const h = 400
+
+  let ref;
+
+  const ball = {
+   x: 100,
+   y: 100,
+   vx: 9,
+   vy: 3,
+   radius: 25,
+   color: 'blue',
+   draw: function() {
+     ctx.beginPath();
+     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true)
+     ctx.closePath();
+     ctx.fillStyle = this.color;
+     ctx.fill()
+   }
+ }
+
+  function clear() {
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillRect(0,0,w, h);
+  }
+
+  function draw() {
+    clear()
+    ball.draw()
+
+    ball.x += ball.vx
+    ball.y += ball.vy
+
+    if (ball.y + ball.vy > h || ball.y + ball.vy < 0) {
+      ball.vy = -ball.vy;
+      
+    }
+    if (ball.x + ball.vx > w || ball.x + ball.vx < 0) {
+      ball.vx = -ball.vx;
+    }
+    
+    window.requestAnimationFrame(draw);
+  }
+
+  draw()
+
+  ball.draw();
 }
 
 export default {
   drawSolar,
-  drawClock
+  drawClock,
+  drawABall,
 }
