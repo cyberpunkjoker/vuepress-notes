@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker';
 
 // 获取 wav文件基础信息
 export class WavHead {
@@ -58,9 +59,53 @@ export class WavHead {
   }
 }
 
-
 // buffer 转 base64 函数
 export const arrayBufferToBase64Img = (buffer: ArrayBuffer):string => {
   const str = String.fromCharCode(...new Uint8Array(buffer))
   return `data:image/jpeg;base64,${window.btoa(str)}`
+}
+
+// mock数据生成工具
+export const makeMockData = (
+  len: number, 
+  type: 'simple' | 'hard' = 'simple',
+): any[] => {
+  let data = []
+  for (let id = 0; id < len; ++id) {
+    data.push({
+      id,
+      value: type === 'simple' ? 'item' + id : faker.lorem.sentences()
+    });
+  }
+  return data
+}
+
+export enum CompareResult {
+  eq = 1,
+  lt,
+  gt
+}
+
+export function binarySearch<T, VT> (
+  list: T[],
+  topVal: VT,
+  compareFunc: (current: T, value: VT) => CompareResult
+) {
+  let start = 0
+  let end = list.length - 1
+  let tempIndex = null
+  while (start <= end) {
+    tempIndex = Math.floor((start + end) / 2);
+    const midValue = list[tempIndex]
+    const compareRes: CompareResult = compareFunc(midValue, topVal);
+    if (compareRes === CompareResult.eq) {
+      return tempIndex;
+    }
+    if (compareRes === CompareResult.lt) {
+      start = tempIndex + 1;
+    } else if (compareRes === CompareResult.gt) {
+      end = tempIndex - 1;
+    }
+  }
+  return tempIndex
 }

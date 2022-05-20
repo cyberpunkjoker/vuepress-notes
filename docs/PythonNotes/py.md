@@ -606,26 +606,75 @@ data = json.loads(rest)
 
 ### 进程和线程
 一个进程中可以有多个线程，它们共享这个进程的资源
-
+- 计算密集型（多进程） -- 要进行大量的计算，消耗CPU资源。比如计算圆周率、对视频进行高清解码等等，全靠CPU的运算能力。
+- IO密集型（多线程） -- 涉及到网络、磁盘IO的任务都是IO密集型任务。
 #### 多进程
 
 fork(): 适用于Unix/Linux操作系统
 兼容 windows => `multiprocessing`:
 
-创建子进程
+**创建子进程**
 Pool
 同时运行的 进程个数是根据cup 核数来的。
+```py
+import concurrent.futures
+PRIMES = [
+    1116281,
+    1297337,
+    104395303,
+    472882027,
+    533000389,
+    817504243,
+    982451653,
+    112272535095293,
+    112582705942171,
+    112272535095293,
+    115280095190773,
+    115797848077099,
+    1099726899285419
+]
+def is_prime(n):
+    """判断素数"""
+    for i in range(2, int(n ** 0.5) + 1):
+        if n % i == 0:
+            return False
+    return n != 1
 
-子进程的输入输出：
-输出：
-subprocess.call(['nslookup', 'www.python.org'])
+def main():
+    """主函数"""
+    with concurrent.futures.ProcessPoolExecutor(max_workers=16) as executor:
+        for number, prime in zip(PRIMES, executor.map(is_prime, PRIMES)):
+            print('%d is prime: %s' % (number, prime))
+```
 
-输入：
-p = subprocess.Popen(['nslookup'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-p.communicate(b'set q=mx\npython.org\nexit\n')
+**进程之间的通信：**
+```py
+import time
+from multiprocessing import Process, Queue
 
-进程之间的通信：
+def sub_task(content, queue):
+  counter = queue.get()
+  while counter < 50:
+    print(content)
+    counter += 1
+    queue.put(counter)
+    time.sleep(0.01)
+    counter = queue.get()
 
+def main():
+  queue = Queue()
+  queue.put(0)
+  p1 = Process(target=sub_task, args=('Ping', queue))
+  p1.start()
+  p2 = Process(target=sub_task, args=('Pong', queue))
+  p2.start()
+  while p1.is_alive() and p2.is_alive():
+    pass
+  queue.put(50)
+
+if __name__ == '__main__':
+    main()
+```
 
 
 在Unix/Linux下，可以使用fork()调用实现多进程。
@@ -634,18 +683,93 @@ p.communicate(b'set q=mx\npython.org\nexit\n')
 
 进程间通信是通过Queue、Pipes等实现的。
 
-
-
-
-
-
 #### 多线程
 Python的threading模块有个current_thread()函数，它永远返回当前线程的实例
 
 多线程和多进程最大的不同在于，多进程中，同一个变量，各自有一份拷贝存在于每个进程中，互不影响，而多线程中，所有变量都由所有线程共享，所以，任何一个变量都可以被任何一个线程修改，因此，线程之间共享数据最大的危险在于多个线程同时改一个变量，把内容给改乱了。
 
+**举个🌰说明一下：**
 
+当我们运行几个耗时的任务，且任务之间并没有逻辑上的因果关系，则这几个任务其实是可以“并发”的。
 
+而并发也有几种不同的方式可以实现：
+- 使用 Thread 类创建线程对象
+- 继承 Thread 类自定义线程
+- 使用线程池
+```py
+import random
+import time
+from threading import Thread
+
+def download(*, filename):
+  start = time.time()
+  print(f'开始下载{filename}.')
+  time.sleep(random.randint(3, 6))
+  print(f'{filename}下载完成.')
+  end = time.time()
+  print(f'下载耗时：{end - start:.3f}秒.')
+
+def main():
+  threads = [
+    Thread(target=download,kwargs={'filename': 'Python从入门到住院.pdf'}),
+    Thread(target=download,kwargs={'filename': 'MySQL从删库到跑路.avi' }),
+    Thread(target=download,kwargs={'filename': 'Linux从精通到放弃.mp4' }),
+  ]
+  start = time.time()
+  for thread in threads:
+    thread.start()
+  for thread in threads:
+    thread.join()
+  end = time.time()
+  print(f'总耗时：{end - start:.3f}秒.')
+######------- 耗时结果如下 -------
+###   Linux从精通到放弃.mp4下载完成.
+###   下载耗时：3.005秒.
+###   MySQL从删库到跑路.avi下载完成.
+###   下载耗时：4.000秒.
+###   Python从入门到住院.pdf下载完成.
+###   下载耗时：5.000秒.
+###   总耗时：5.001秒.
+```
+
+**资源竞争**
+在编写多线程代码时，不可避免的会遇到多个线程竞争同一个资源（对象）的情况, 所以要采用**锁机制**
+```py
+from concurrent.futures import ThreadPoolExecutor
+from threading import RLock
+
+class Account(object):
+  def __init__(self) -> None:
+      self.balance = 0.0
+      self.lock = RLock()
+
+  def deposit(self, money):
+    # 通过上下文语法获得锁和释放锁
+    with self.lock:
+      new_balance = self.balance + money
+      time.sleep(0.01)
+      self.balance = new_balance
+  
+def main():
+  account = Account()
+  start = time.time()
+  with ThreadPoolExecutor(max_workers=20) as pool:   # 线程池
+    for _ in range(100):
+      pool.submit(account.deposit, 1)
+  end = time.time()
+  print(f'总耗时{end - start:.3f}')
+  print(account.balance)
+
+if __name__ == '__main__':
+  main()
+```
+
+::: py知识点补充
+1. 关于请求的三个包
+- requests只能发送同步请求；
+- aiohttp只能发送异步请求；
+- httpx既能发送同步请求，又能发送异步请求。
+:::
 ## python 遗留问题
 TODO：
 1. py 项目如何包管理

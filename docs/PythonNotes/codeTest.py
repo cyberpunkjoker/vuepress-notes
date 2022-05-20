@@ -1,6 +1,4 @@
 from functools import reduce
-import functools
-
 
 l = [1,2,3,4,5,6,7,8,9]
 # 找最大最小值

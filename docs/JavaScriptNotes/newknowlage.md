@@ -1,7 +1,31 @@
 ## 异或
+what：异或是通过比较二进制位的值，相同位0，不同为1。
+- 结合律 (a ^ b) ^ c = a ^ (b ^ c);
+- 交换律 a ^ b = b ^ a;
 
+特别的：⬇️
+- 异或自己的结果为0：a ^ a = 0；
+- 异或0的结果还是自己本身：a ^ 0 = a；
+- 异或-1的结果为自身的值按位取反值：a ^ -1 = ~a
 
+**一些例子**
+```js
+// 交换x 和 y的值，因为js没有指针所以只能通过对象修改
+function exchange (obj) {
+  obj.y = obj.x ^ obj.y
+  obj.x = obj.x ^ obj.y
+  obj.y = obj.x ^ obj.y
+}
 
+// 给定一个非空整数数组，除了某个元素只出现一次以外，其余每个元素均出现两次。找出那个只出现了一次的元素
+function findOne(nums) {
+  let res = 0
+  nums.forEach(el => {
+    res ^= el
+  });
+  return res
+}
+```
 ## websocket
 在`webpack`之前实现的两种方式：
 1. 轮询：让浏览器每间隔几秒，就发送一次请求。
@@ -389,3 +413,35 @@ new webpack.DefinePlugin({
 
 
 ## 前端性能优化
+### 虚拟列表
+简单版本的虚拟列表：
+<vList></vList>
+
+实现方式：
+
+前提：每行的高度固定的情况可以使用这种方式。
+1. 根据 scrollTop `Math.floor(scrollTop / rowHeight)` 算出当前展示的第一个元算的索引是多少。
+2. 再根据 `Math.ceil(height / rowHeight)` 算出当前可视区可以展示的个数
+3. 使用绝对定位 计算出每个元素 `idx * rowHeight` 的 top值
+
+优化点： 上下快速滑动会出现留白的情况。所以要在上下多保留几个元素。
+- `startIndex = Math.max(currIndex - bufferSize, 0)`
+- `endIndex = Math.min(currIndex + limit + bufferSize, dataCount - 1)`
+
+每行非定高版本：
+<vListFin />
+
+这里因为开始时不知道每一行的高度，所以不能像简易版一样算出虚拟列表的真实高度。但是可以假设每一行的高度，
+利用一个假的盒子来填充高度。可视区盒子来展示可见Dom
+1. 使用一个数组 `cachedPositions`来存储每一个item 的元素信息包括 `{index, height, bottom}`值，
+2. 每次滚动的时候获取 展示列表 `showList` 此时dom节点就会更新，然后就可以获取展示区，真实的Dom信息，
+并更新 `cachedPositions` 中的每一个 `bottom` 的最新坐标，当所有元素都被加载，`cachedPositions`
+里面就会存储每一个的真实信息。（如果数据量过大，这里的更新频率可以限制一下）
+3. 位置定位，采用`translate`而非绝对定位，这样可以直接将整体可视区上下平移。
+```js
+`translate3d(0,${
+  startIndex >= 1
+    ? cachedPositions[rect.startIndex - 1].bottom
+    : 0
+}px,0)`})
+```

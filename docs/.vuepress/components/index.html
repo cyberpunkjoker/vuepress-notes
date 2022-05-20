@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <style>
+    .container {
+      --keyword: keyword(red, 50%);
+      color: var(--keyword);
+    }
+
+  </style>
+
+</head>
+<body>
+  <div class="container">12312312</div>
+</body>
+
+<script>
+(function () {
+    if (!window.CSS) {
+        return;
+    }
+
+    if (!NodeList.prototype.forEach) {
+        NodeList.prototype.forEach = Array.prototype.forEach;
+    }
+
+
+    var isSameDomain = function (styleSheet) {
+        if (!styleSheet.href) {
+            return true;
+        }
+
+        return styleSheet.href.indexOf(window.location.origin) === 0;
+    };
+
+    var isStyleRule = function (rule) {
+        return rule.type === 1;
+    };
+
+    var arrCSSCustomProps = (function () {
+        return [].slice.call(document.styleSheets).filter(isSameDomain).reduce(function (finalArr, sheet) {
+            return finalArr.concat([].slice.call(sheet.cssRules).filter(isStyleRule).reduce(function (propValArr, rule) {
+                var props = [].slice.call(rule.style).map(function (propName) {
+                    return [
+                        propName.trim(),
+                        rule.style.getPropertyValue(propName).trim()
+                    ];
+                }).filter(function ([propName]) {
+                    return propName.indexOf('--') === 0;
+                });
+
+                return [].concat(propValArr, props);
+            }, []));
+        }, []);
+    })();
+
+    var arrCssPropsValueIsKeyword = arrCSSCustomProps.filter(function (arrPropVal) {
+        return /keyword\([\w\W]+\)/i.test(arrPropVal[1]);
+    });
+
+    var funKeywordColor2Rgba = function (node) {
+        if (node.nodeType != 1 || ['script', 'style', 'meta', 'title', 'head'].includes(node.nodeName.toLowerCase())) {
+            return;
+        }
+
+        var objStyle = window.getComputedStyle(node);
+
+        arrCssPropsValueIsKeyword.forEach(function (arr) {
+            var cssProp = arr[0];
+
+            var cssVarValueKeyword = objStyle.getPropertyValue(cssProp);
+
+            if (!cssVarValueKeyword || !cssVarValueKeyword.trim() || !/keyword\([\w\W]+\)/i.test(cssVarValueKeyword)) {
+                return;
+            }
+
+            cssVarValueKeyword = arr[1];
+
+            var keyColorAndOpacity = cssVarValueKeyword.replace(/\w+\(([\w\W]+)\)/, '$1');
+
+            var arrKeyColorAndOpacity = keyColorAndOpacity.split(/\s+/);
+
+            if (/,/.test(keyColorAndOpacity)) {
+                arrKeyColorAndOpacity = keyColorAndOpacity.split(',');
+            } else if (/\//.test(keyColorAndOpacity)) {
+                arrKeyColorAndOpacity = keyColorAndOpacity.split(',');
+            }
+
+            if (arrKeyColorAndOpacity.length != 2) {
+                return;
+            }
+
+            var keyColor = arrKeyColorAndOpacity[0].trim();
+            var opacity = (arrKeyColorAndOpacity[1] || '1').trim();
+
+            document.head.style.backgroundColor = keyColor;
+            var rgbColor = window.getComputedStyle(document.head).backgroundColor;
+
+            var applyColor = '';
+            if (/^rgba/.test(rgbColor)) {
+                applyColor = rgbColor.replace('1)', opacity + ')');
+            } else {
+                applyColor = rgbColor.replace(')', ', ' + opacity + ')');
+            }
+
+            node.style.setProperty(cssProp, applyColor);
+        });
+    };
+
+
+    var funAutoInitAndWatching = function () {
+        // DOM Insert鑷姩鍒濆鍖�
+        if (window.MutationObserver) {
+            var observerSelect = new MutationObserver(function (mutationsList) {
+                mutationsList.forEach(function (mutation) {
+                    var nodeAdded = mutation.addedNodes;
+                    // 鏂板鍏冪礌
+                    nodeAdded.forEach(function (eleAdd) {
+                        funKeywordColor2Rgba(eleAdd);
+                    });
+                });
+            });
+
+            observerSelect.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+
+        // 濡傛灉娌℃湁寮€鍚嚜鍔ㄥ垵濮嬪寲锛屽垯杩斿洖
+        document.querySelectorAll('*').forEach(function (ele) {
+            funKeywordColor2Rgba(ele);
+        });
+    };
+
+    if (document.readyState != 'loading') {
+        funAutoInitAndWatching();
+    } else {
+        window.addEventListener('DOMContentLoaded', funAutoInitAndWatching);
+    }
+})();
+</script>
+</html>
