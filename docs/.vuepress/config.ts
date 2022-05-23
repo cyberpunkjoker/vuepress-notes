@@ -17,18 +17,6 @@ module.exports = {
       { text: 'python', link: '/PythonNotes' }
     ],
     displayAllHeaders: 2,
-    // sidebar:{
-    //   '/JavaScriptNotes/': [
-    //     {
-    //       children: [
-    //         { text: '正则', link: '/JavaScriptNotes/regular' },
-    //         { text: '项目相关代码', link: '/JavaScriptNotes/work' },
-    //         { text: '知识点记载', link: '/JavaScriptNotes/newknowlage'},
-    //         { text: 'typeScript', link: '/JavaScriptNotes/ts' }
-    //       ]
-    //     }
-    //   ],
-    // },
     sidebar: 'auto',
   },
   markdown: {
