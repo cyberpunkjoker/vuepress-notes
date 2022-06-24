@@ -60,9 +60,9 @@ export class WavHead {
 }
 
 // buffer 转 base64 函数
-export const arrayBufferToBase64Img = (buffer: ArrayBuffer):string => {
+export const arrayBufferToBase64Img = (buffer: ArrayBuffer, type: any):string => {
   const str = String.fromCharCode(...new Uint8Array(buffer))
-  return `data:image/jpeg;base64,${window.btoa(str)}`
+  return `data:${type};base64,${window.btoa(str)}`
 }
 
 // mock数据生成工具

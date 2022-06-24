@@ -15,6 +15,11 @@
 
 3. 其它 - 一些有趣的项目研究
 - VueUse 代码研究。 [vueUse](./vueUse.md)
-- ahook 代码研究。 [ahook](./ahook.md)
+- react 相关知识。 [react](./react.md)
 
 :::
+
+
+未完成项：
+1. ffmpeg 前端版本实现
+2. RTCPeerConnection 语音通话

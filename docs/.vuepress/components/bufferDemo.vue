@@ -48,10 +48,6 @@ const compressImg = async(props: ICompressProps) => {
       img.src = e.target.result as string
     }
 
-    // 方案二: 自己转图片信息为 base64
-    // const buffer: ArrayBuffer = await file.arrayBuffer()
-    // img.src = arrayBufferToBase64Img(buffer)
-    
     // ----- 将图片的 onload 事件包装成 promise -> 同步操作 ---------------------
     const imgLoaded = (img: HTMLImageElement):Promise<Blob> => {
       return new Promise((resolve, reject) => {
@@ -81,7 +77,7 @@ const compressImg = async(props: ICompressProps) => {
   
   const blob = await loop(props)
   const bf = await blob.arrayBuffer()
-  state.base64Img = arrayBufferToBase64Img(bf)
+  state.base64Img = arrayBufferToBase64Img(bf, props.file.type)
   state.size = blob.size
 }
 
