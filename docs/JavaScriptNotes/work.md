@@ -11,6 +11,7 @@
 
 
 ## 平时遇到的一些笔记📒
+### js笔记相关
 1. **判断有无传参，并对传参为 undefined 特殊处理**
 ```js
 // 箭头函数无 arguments 参数
@@ -59,27 +60,17 @@ function resolveImg(img, callback) {
 }
 ```
 
-3. **关于浮窗设计遇到的一些问题。**
-- 3.1 浮窗设计一般不要和按钮设计在一起
+3. **记录一些特殊数据**
 
-4. **如何设置一个拖拽组件（放大，缩小）**
-
-在设置拖拽组件的时候，很容易出现“拖掉”情况，这种时候一般就会采用事件委托，把事件委托给body。这里推荐另一种做法 setPointerCapture，这个功能可以确保一个元素可以持续的接收到一个 pointer 事件，即使这个事件的触发点已经移出了这个元素（比如，在滚动的时候）。
-<resizeBox>
-  <template #content>
-    这是用来测试的文本内容
-  </template>
-</resizeBox>
-
-
-5. **记录一些特殊数据**
 小数加减的时候可以用来测试一下
 - 0.1 + 0.2
 - 19.9 * 100
 - 32.3 * 100
 - 0.56 * 100
 
-6. **实现 h5 免提功能**
+
+4. **实现 h5 免提功能**
+
 免提功能其实就对 输出设备（audiooutput）的切换，正常语音时是通过听筒输出声音，而免提功能则需要将输出设备切换至扬声器。
 
 ```js
@@ -91,10 +82,48 @@ navigator.mediaDevices.enumerateDevices().then(devices => {
   })
 })
 ```
-
 到这里好像可以实现了，但是。经过 H5 页面测试，该方法是找不到听筒设备的，所以就能切换也切不回去了。
 
 综上：还是要使用 `jsBridge` 直接调用原生方法去切换扬声器和听筒
+
+### 组件设计相关
+1. **关于浮窗设计遇到的一些问题。**
+- 1.1 浮窗设计一般不要和按钮设计在一起
+
+2. **如何设置一个拖拽组件（放大，缩小）**
+
+在设置拖拽组件的时候，很容易出现“拖掉”情况，这种时候一般就会采用事件委托，把事件委托给body。这里推荐另一种做法 setPointerCapture，这个功能可以确保一个元素可以持续的接收到一个 pointer 事件，即使这个事件的触发点已经移出了这个元素（比如，在滚动的时候）。
+<resizeBox>
+  <template #content>
+    这是用来测试的文本内容
+  </template>
+</resizeBox>
+
+3. **实现一个向前滚动的输入框**
+
+使用纯 css 的功能实现，主要是对子盒子 绝对定位 然后 `min-width: 100%;`
+<longInput/>
+
+```less
+ .input-warpper {  //父盒子正常样式不用管
+  position: relative;
+  width: 100px;
+  height: 32px;
+  text-align: center;
+  border: 1px solid #aaa;
+  border-radius: 2px;
+  overflow: hidden;
+  
+  .txt {
+    position: absolute;
+    right: 0;
+    min-width: 100%;
+    // 上下居中不用管
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+```
 
 ## tab切换问题记载
 **该方案 -- 对标于不对用户点击限制的情况下**

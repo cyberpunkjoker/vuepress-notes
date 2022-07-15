@@ -11,5 +11,17 @@ babel 相关插件
 "babel-loader": "^8.2.5",
 "babel-preset-env": 最新es编译标准,
 
-
 babel 如何转译 ts 文件
+
+
+
+## 加入 react
+
+cross-env -- 设置环境变量
+webpack-dev-server -- 本地服务器
+
+tree-shaking
+
+
+
+mac nvm ---- https://www.jianshu.com/p/cb5265434d91

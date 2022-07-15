@@ -405,10 +405,11 @@ new webpack.DefinePlugin({
     'process.env.NO_AUTH': !!process.env.NO_AUTH,
 })
 ```
-
 :::tip 注意点
-猜测 process.env.NO_AUTH 是以字符串的形式 储存的固定值
+1. 猜测 process.env.NO_AUTH 是以字符串的形式 储存的固定值
 所以使用的时候要对整个 process.env.NO_AUTH 使用，只是打印 process 是会报错的
+
+2. 上面的例子是个特例，执行的指令为 `node ./server/index.js`，没有使用webpack，直接使用了 express 搭建的，所以可以直接在前面加变量，若是使用 webpack，需要使用 cross-env 配合 DefinePlugin 一起使用
 :::
 
 
@@ -447,17 +448,40 @@ new webpack.DefinePlugin({
 ```
 
 ## 跨域问题
+
 1. 产生跨域的原因：
 所谓同源是指：**域名、协议、端口相同** 如果发出去的请求不是本域的，协议官方、域名、端口，任何一个不一样，浏览器就认为是跨域的
 
 2. 限制同源的两个场景
-- 一是针对接口的请求：如果不限制 浏览器会自动将cookie附加在HTTP请求的头字段Cookie中，这样一来，这个不法网站就相当于登录了你的账号。（（(CSRF攻击方式)[https://www.cnblogs.com/hyddd/archive/2009/04/09/1432744.html]）
+- 一是针对接口的请求：如果不限制 浏览器会自动将cookie附加在HTTP请求的头字段Cookie中，这样一来，这个不法网站就相当于登录了你的账号。（[CSRF攻击方式](https://www.cnblogs.com/hyddd/archive/2009/04/09/1432744.html)）
 - 二是针对Dom的查询。如果不限制：就可以通过嵌入`iframe`的方式，嵌入网页查询提交表单的信息
 
 3. 如何判断一个请求是不是跨域请求
 当请求头中的 host 和 origin 不一致就是跨域请求
 
 
+### CORS （跨域资源共享）
+[cors 文章参考](http://www.ruanyifeng.com/blog/2016/04/cors.html)
+
+如何实现：
+1. 针对于简单请求
+- 添加一个 `origin` 字段 **(浏览器发现这次跨源AJAX请求是简单请求，就自动在头信息之中，添加一个Origin字段。)**
+  - 如果响应头没有包含 `Access-Control-Allow-Origin` 就出错了。会被 `XMLHttpRequest` 的 `onerror` 回调函数捕获。注意，这种错误无法通过状态码识别，因为HTTP回应的状态码有可能是200。
+  - 若成功，则会返回
+  ```js
+    Access-Control-Allow-Origin: 'http://xxx.com'
+    Access-Control-Allow-Credentials: true 
+    Access-Control-Expose-Headers: FooBar
+  ```
+  `withCredentials`: （发送cookie）前端需要设置 XMLHttpRequest -> `xhr.withCredentials = true`
+  要发送Cookie，Access-Control-Allow-Origin就不能设为星号，必须指定明确的、与请求网页一致的域名
+
+2. 非简单请求
+非简单请求是那种对服务器有特殊要求的请求，比如请求方法是PUT或DELETE，或者Content-Type字段的类型是application/json。
+
+- 非简单请求的CORS请求，会在正式通信之前，增加一次HTTP查询请求（option）剩下的和简单类似。但是要看一下这些信息
+  - `Access-Control-Request-Method`
+  - `Access-Control-Request-Headers`
 
 ### nginx
 1. 为了解决负载均衡问题，使用nginx服务器，把不同的客户端请求分发到不同的服务器（nginx 有一种 ip_hash 策略，它可以获取用户真实ip）
@@ -469,3 +493,7 @@ new webpack.DefinePlugin({
 <img src="../asset/display/proxy2.jpeg" />
 
 **区别：**  正向代理是代理了客户端，而反向代理则是代理服务器端。在有多台服务器分布的情况下，为了能让客户端访问到的IP地址都为同一个网站，就需要使用反向代理。
+
+
+## 安全相关知识
+### CSRF攻击
