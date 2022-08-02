@@ -1,23 +1,29 @@
-const path = require('path');
+import path from 'path'
+import defaultTheme from '@vuepress/theme-default'
+import { registerComponentsPlugin } from '@vuepress/plugin-register-components'
+
 
 module.exports = {
   title: '笔记',
   description: '前端学习笔记',
-  plugins: [
-    [
-      '@vuepress/register-components',
-        {
-          componentsDir: path.resolve(__dirname, './components'),
-        },
-    ],
-  ],
-  themeConfig: {
+  theme: defaultTheme({
     navbar: [
       { text: '首页', link: '/JavaScriptNotes' },
       { text: 'python', link: '/PythonNotes' }
     ],
-    displayAllHeaders: 2,
+    sidebarDepth: 2,
     sidebar: 'auto',
+  }),
+  plugins: [
+    [
+      registerComponentsPlugin({
+        componentsDir: path.resolve(__dirname, './components'),
+      })
+    ],
+  ],
+  themeConfig: {
+   
+    
   },
   markdown: {
     lineNumbers: true
