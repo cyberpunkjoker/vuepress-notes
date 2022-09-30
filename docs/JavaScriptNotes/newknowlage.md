@@ -447,6 +447,11 @@ new webpack.DefinePlugin({
 }px,0)`})
 ```
 
+### 性能分析需要注意的一些点
+1. 静态资源是否有卡断（尤其是懒加载的组件）
+2. 请求接口是否返回缓慢
+3. 监听事件是否太多
+4. dom节点是否过多
 ## 跨域问题
 
 1. 产生跨域的原因：
@@ -469,9 +474,11 @@ new webpack.DefinePlugin({
   - 如果响应头没有包含 `Access-Control-Allow-Origin` 就出错了。会被 `XMLHttpRequest` 的 `onerror` 回调函数捕获。注意，这种错误无法通过状态码识别，因为HTTP回应的状态码有可能是200。
   - 若成功，则会返回
   ```js
-    Access-Control-Allow-Origin: 'http://xxx.com'
-    Access-Control-Allow-Credentials: true 
-    Access-Control-Expose-Headers: FooBar
+  {
+    Access-Control-Allow-Origin: 'http://xxx.com',
+    Access-Control-Allow-Credentials: true,
+    Access-Control-Expose-Headers: FooBar,
+  }
   ```
   `withCredentials`: （发送cookie）前端需要设置 XMLHttpRequest -> `xhr.withCredentials = true`
   要发送Cookie，Access-Control-Allow-Origin就不能设为星号，必须指定明确的、与请求网页一致的域名
@@ -495,5 +502,20 @@ new webpack.DefinePlugin({
 **区别：**  正向代理是代理了客户端，而反向代理则是代理服务器端。在有多台服务器分布的情况下，为了能让客户端访问到的IP地址都为同一个网站，就需要使用反向代理。
 
 
-## 安全相关知识
-### CSRF攻击
+
+
+## 前端存储
+前端缓存有两种，
+1. 一种是将数据保存在 内存 中，比如 vue中使用的vuex，react中使用的redux 等，这种方式的本质就是一个容器，而这种修改容器中的值，相应的组件也会更新。
+2. 另一种是采用本地存储手段 sessionStorage、localStorage、indexDB，非响应式的。
+
+:::details 问题：
+研究的目的：针对前端处理较大数据时，能不能减轻内存压力。
+- 使用缓存存储：读写寿命高，速度快，内存小。性能依赖内存条。
+- 使用本地存储：读写寿命低，速度慢（异步io）,依赖磁盘的读写能力。并且如果用户在使用磁盘读写功能（比如拷贝），可能会导致排队问题不能实时读写数据
+:::
+#### indexedDB
+适用于：相比 Storage 更加大量的数据。（异步操作） ---- （也许可以结合 web workers 一起使用）
+
+存在同源限制
+

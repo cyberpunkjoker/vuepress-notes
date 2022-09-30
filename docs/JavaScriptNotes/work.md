@@ -9,6 +9,15 @@
 ## search-table 组件
 
 
+## cookie 相关
+背景：生产环境升级，http => https，权限系统采用 cookie 设计。在两个双重问题下，导致发送的请求无法带上cookie，原因详见[文章](https://juejin.cn/post/6844904095711494151?utm_source=gold_browser_extension)。
+
+解决方法：1.将地址代理为 https。 2.采用https启用本地项目服务（这个就是解决无法带 cookie 的原因 --- http资源 访问 https接口）
+#### 关于cookie
+1. cookie 被用于解决HTTP无状态导致的问题 （一般不超过4Kb）
+- 而造成上诉主要问题的主要原因就是：SameSite
+- SameSite 属性可以让 Cookie 在跨站请求时不会被发送，从而可以阻止跨站请求伪造攻击（CSRF）。
+- 同源策略的同源是指两个 URL 的协议/主机名/端口一致
 
 ## 平时遇到的一些笔记📒
 ### js笔记相关
@@ -311,3 +320,44 @@ function gotRemoteMediaStream(event) {
 }
 ```
 
+## 移动端笔记记录
+#### 关于 0.5px 的问题
+主要是利用 transform: scale(0.5); 缩放功能实现
+```css
+.border::before {
+  content: " ";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  border: 1px solid #EF4034;
+  border-radius: 16px;
+  transform-origin: 0 0;
+  transform: scale(0.5);
+}
+```
+
+#### 移动端
+
+
+## antd 坑
+#### 样式替换
+antd 4.x 版本样式修改
+```less
+// --- 现在需要在外层添加 :global 或者 #root 才行
+:global {
+  .faqInput {
+    // 修改select样式。
+    .ant-select-selector {
+      box-shadow: none!important;
+    }
+    .ant-select-focused .ant-select-selector {
+      border: 1px solid #2C68FF!important
+    }
+    .ant-select-selector:hover {
+      border: 1px solid #2C68FF!important
+    }
+  }
+}
+```
