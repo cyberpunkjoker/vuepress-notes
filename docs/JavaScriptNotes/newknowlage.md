@@ -515,7 +515,253 @@ new webpack.DefinePlugin({
 - 使用本地存储：读写寿命低，速度慢（异步io）,依赖磁盘的读写能力。并且如果用户在使用磁盘读写功能（比如拷贝），可能会导致排队问题不能实时读写数据
 :::
 #### indexedDB
-适用于：相比 Storage 更加大量的数据。（异步操作） ---- （也许可以结合 web workers 一起使用）
+> 1. 相比 Storage 更加大量的数据。
+> 2. 异步操作
+> 3. 存在同源限制
+> 4. ---- （也许可以结合 web workers 一起使用）(后面再研究一下)
 
-存在同源限制
+**indexedDB 基础 增删改查 功能 demo 展示**
+使用方式：
+1. 打开数据库 `window.indexedDB.open()`
+2. 在数据库中创建一个对象仓库  
+```js
+db.createObjectStore("storeName", {
+  keyPath: "", // 这是主键
+  // autoIncrement: true // 实现自增
+});
+```
+2. 对于增删改查操作
+```js
+// 1. 首先要启动一个事务，然后选择对应的仓库对象
+db
+  .transaction([storeName], "readwrite") // 事务对象 指定表格名称和操作模式（"只读"或"读写"）
+  .objectStore(storeName) // 仓库对象
+```
+3. indexedDB 有一个游标的概念，可以使用游标`openCursor`去遍历数据筛选数据
+- 并且openCursor可以制定搜素方式 by `IDBKeyRange`
+
+4. 注意点
+- 在使用 indexedDB 增删改的时候是异步操作，所以要使用 promise 同步操作。
+- 事务（`transaction`）要现开现用, 如果使用全局存储一个事务，需要修改的时候去调用就会报 事务已经结束的错误。
+
+:::details 简单功能封装代码展示
+```ts
+interface IDBBase {
+  dbName: string;
+  version: number;
+  paramsList: {name: string, uni: boolean}[];
+  storeName: string;
+  keyPath: string;
+}
+
+export default class IndexedDB {
+  _dbName: string = 'myDB';
+  _dbVersion: number = 1;
+  _dbTable: { name: string, uni: boolean}[] = [];
+  _db: any = null;
+  _storeName: string = '';
+  _keyPath: string = '';
+  _objectStore: any = null;
+
+  constructor(info: IDBBase) {
+    this._dbName = info.dbName;
+    this._dbVersion = info.version;
+    this._dbTable = info.paramsList;
+    this._storeName = info.storeName;
+    this._keyPath = info.keyPath
+
+    if (this._db) {
+      console.log('已存在打开数据库～～，请关闭')
+    }
+  }
+
+  public checkIsSupportDB = () => {
+    if (!window.indexedDB) {
+      console.error('浏览器版本不支持使用')
+      return false
+    } else {
+      return true
+    }
+  }
+
+  public startObjectStore = () => { // 事务要现开现用，不然事务会结束。
+    this._objectStore = this._db.transaction(this._storeName, 'readwrite').objectStore(this._storeName)
+  }
+
+  public handleErrorMsg = (err: any) => {
+    if (err.type === "error") {
+      console.log(err.srcElement.error);
+    }
+  }
+
+  public handleSingleAdd = (data: any) => {
+    return new Promise((resolve, reject) => {
+      this.startObjectStore()
+      const request = this._objectStore.add(data)
+      
+      request.onsuccess = () => {
+        console.log('数据添加成功');
+        resolve(true)
+      }
+  
+      request.onerror = (err) => {
+        console.log('数据添加失败');
+        this.handleErrorMsg(err)
+        reject(false)
+      }
+    })
+  }
+
+  public openDB = () => {
+    if (!this.checkIsSupportDB()) return
+    return new Promise ((resolve, reject) => {
+      const indexDB = window.indexedDB
+      const request = indexDB.open(this._dbName, this._dbVersion)
+  
+      request.onsuccess = (event) => {
+        console.log("数据库打开成功");
+        resolve(event.target.result)
+        this._db = event.target.result
+      }
+  
+      request.onerror = (err) => {
+        console.log("数据库打开失败", err);
+        reject(null)
+        this._db = null
+      }
+  
+      // 数据库更新时的回调
+      request.onupgradeneeded = (event) => {
+        console.log('数据库更新');
+        this._db = event.target.result;
+  
+        const objectStore = this._db.createObjectStore(this._storeName, {
+          keyPath: this._keyPath,
+        })
+  
+        this._dbTable.forEach(i => {
+          objectStore.createIndex(i.name, i.name, { unique: i.uni }); 
+        })
+      }
+  
+      // 在其他标签页打开了该数据库 触发
+      request.onblocked = () => {
+        alert("请关闭其它由该站点打开的页签")
+      }
+    })
+  }
+
+  public addData = (data: any[]) => {
+    return new Promise(async(resolve, reject) => {
+      this.startObjectStore()
+      const passIds = []
+      const failedIds = []
+
+      for (const item of data) {
+        try {
+          await this.handleSingleAdd(item)
+          passIds.push(item.ssn)
+        } catch (error) {
+          failedIds.push(item.ssn)
+        }
+      }
+      resolve({
+        passIds, failedIds,
+        allPassed: failedIds.length <= 0
+      })
+    })
+  }
+
+  // 按主键删除
+  public delData = (key: string) => {
+    return new Promise((resolve, reject) => {
+      this.startObjectStore()
+      const request = this._objectStore.delete(key)
+      
+      request.onsuccess = () => {
+        console.log('数据删除成功');
+        resolve(true)
+      }
+
+      request.onerror = () => {
+        console.log('数据删除失败');
+        reject(false)
+      }
+    })
+  }
+
+  public updateData = (data: any) => {
+    return new Promise((resolve, reject) => {
+      this.startObjectStore()
+      const request = this._objectStore.put(data)
+      
+      request.onsuccess = () => {
+        console.log('数据更新成功');
+        resolve(true)
+      }
+  
+      request.onerror = () => {
+        console.log('数据更新失败');
+        reject(false)
+      }
+    })
+  }
+
+  public findElByIndex = (idx: string, searchName: string) => {
+    return new Promise((resolve, reject) => {
+      const list = []
+      this.startObjectStore()
+      const request = this._objectStore.index(idx).openCursor(IDBKeyRange.only(searchName))
+  
+      request.onsuccess = (e) => {
+        const cursor = e.target.result
+        if (cursor) {
+          list.push(cursor.value)
+          cursor.continue()
+        } else {
+          resolve(list)
+        }
+      }
+    })
+  }
+
+  public queryAllData = () => {
+    return new Promise<any[]>((resolve, reject) => {
+      this.startObjectStore()
+      const list = []
+
+      // 1. 获取全部数据 
+      this._objectStore.getAll().onsuccess = (event) => {
+        resolve(event.target.result)
+      }
+    })
+  }
+
+  public queryCustomCondition = (callback: (params: object) => boolean) => {
+    return new Promise<any[]>((resolve, reject) => {
+      this.startObjectStore()
+      const list = []
+  
+      this._objectStore.openCursor().onsuccess = (event) => {
+        const cursor = event.target.result
+        if (cursor) {
+          callback(cursor.value) && list.push(cursor.value)
+          cursor.continue();
+        } else {
+          resolve(list)
+        }
+      }
+    })
+  }
+
+  public closeDB = () => {
+    this._db.close()
+    this._db = null
+  }
+}
+```
+:::
+
+<indexDB/>
+
 

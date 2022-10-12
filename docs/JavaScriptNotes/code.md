@@ -33,3 +33,33 @@ var searchInsert = function(nums, target) {
 };
 searchInsert([1,3,5,6], 5)
 ```
+
+#### 分治法
+题目：'()'表示1分，()()表示为1+1，'(())'表示为1*2
+
+开始找到最外层的（）。然后次外层的（），找到后去去除最外层（），使用递归。
+```js
+const scoreOfParentheses = function(s) {
+  if (s.length === 2) return 1
+  
+  let bal = 0, 
+      len = s.length, 
+      count = 0;
+      
+  for (let i = 0; i < len; i++) {
+    bal += (s[i] === ')' ? -1 : 1)
+    if (bal === 0) {
+      count = i + 1
+      break;
+    }
+  }
+  if (count === len) { // 1*2的分支
+    return 2 * scoreOfParentheses(s.slice(1, len-1))
+  } else { // 1+1的分支
+    return scoreOfParentheses(s.slice(0, count)) + scoreOfParentheses(s.slice(count))
+  }
+  
+};
+
+console.log(scoreOfParentheses('((()())(()))'))
+```
