@@ -107,7 +107,7 @@ class WavHead {
 2. 音频可视化怎么实现
 <hr/>
 
-##### 音频可视化:
+### 音频可视化
 [参考文章](https://zhuanlan.zhihu.com/p/84202126)
 
 **前置内容补充（需要提前掌握的内容如下）：**
@@ -173,6 +173,12 @@ analyser.getByteFrequencyData(dataArray);
 <tag name='Demo⬇️' colorType="info"/>
 <audioView />
 
+
+
+### 音频录制
+前端录音功能简单流程描述
+
+<recordAudio/>
 
 ## ArrayBuffer 对象
 <knowledgeLine>
