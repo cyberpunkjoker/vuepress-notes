@@ -10,7 +10,7 @@
   <canvas id="audioView"></canvas>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 
 const playAudio = () => {
     const audio = document.getElementById("audio") as HTMLAudioElement;

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div>a page</div>
+  <button id='btn'>点击</button>
+
+  <iframe src="./b.html" frameborder="2"></iframe>
+
+  <script>
+    const bc = new BroadcastChannel("yahaha")
+
+    const send = () => {
+      console.log(1);
+      bc.postMessage({
+        name: 'yahaha',
+        age: 3
+      })
+    }
+    const btn = document.getElementById("btn")
+    btn.addEventListener('click', send)
+
+  var firstMissingPositive = function(nums) {
+    const arr = nums.sort((a,b) => a-b)
+    const idx = arr.findIndex(i => i>=0)
+    if (idx === -1) return 1
+    if (arr[idx] > 1) return 1
+    debugger
+    let num = arr[idx]
+    for (let i = idx; i< arr.length; i++) {
+        if (arr[i] < num) num = arr[i]
+        if (arr[i] !== num) {
+          return num
+        }
+        num += 1
+    }
+    console.log(num);
+    return num
+  };
+
+  firstMissingPositive([-10,-3,-100,-1000,-239,1])
+    
+  </script>
+</body>
+</html>

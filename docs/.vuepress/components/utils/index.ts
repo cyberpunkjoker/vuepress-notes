@@ -16,7 +16,7 @@ export class WavHead {
   // 获取文件格式 wav 为 WAVE
   get formType() {
     const type = String.fromCharCode.apply(null, new Uint8Array(this.buffer.slice(8, 12)))
-    console.log('type: ', type)
+    console.log('type: ', type, new Uint8Array(this.buffer.slice(8, 12)))
     return type
   }
   

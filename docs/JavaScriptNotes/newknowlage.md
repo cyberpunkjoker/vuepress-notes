@@ -35,7 +35,7 @@ function findOne(nums) {
 
 
 ## 音频相关
-#### 需求1: 需要前端校验 上传音频 是否符合 8k 16bit 的要求
+### 校验上传音频位深，采样率
 <b> 补充知识：⬇️ </b>
  - 采样频率： 在一定时间内将连续的模拟信号采样多少次。一般我们说48k采样率，即为1S内采样48000个点，每2个采样点之间时间为1/48000S，即为1/48Ms，也就是1Ms内有48个点。
  
@@ -97,17 +97,57 @@ class WavHead {
 ⚠️注意：只对wav格式音频起效哦～
 <upload />
 
-#### 需求2: 怎么获取视频中的音频源
-首先需要明确一点，不同的视频格式文件的存储信息的位置是不同的，要去读文件还要依照文件的存储机制去读写才行。
+### 怎么获取视频中的音频源
+获取视频中的音频源，需要涉及到的知识点是 **`web audio api`**
 
-<tag name="遗留问题" colorType="red"></tag>
-校验方式：涉及知识点 => 
+而关于该API需要的基础知识很多，这里不深入讲解。知识点详解 [audioApi详情](./webAudioApi.md)
 
-1. buffer 怎么转换成 audio 可以识别的录音
-2. 音频可视化怎么实现
+:::details
+**这里补充几点**
+1. AudioContext.decodeAudioData() 
+  - 方法可用于异步解码音频文件中的 `ArrayBuffer`。`ArrayBuffer` 数据可以通过 `XMLHttpRequest` 和 `FileReader` 来获取。
+  - 也可以将 `videoBuffer` 中的音轨提取出来。
+:::
+
+
+下面示例为分离展示：
+
+```ts
+const changeFile = (e: InputEvent) => {
+  const offlineAudioContext = new OfflineAudioContext(2, 44100 * 100, 44100);
+  const soundSource = offlineAudioContext.createBufferSource();
+
+  const audioContext = new(window.AudioContext || window.webkitAudioContext)();
+  const reader = new FileReader();
+
+  const blob = new Blob([e.target.files[0]]);
+
+  reader.readAsArrayBuffer(blob); // video file
+  reader.onload = function () {
+    const videoFileAsBuffer = reader.result; // arraybuffer
+    
+    audioContext.decodeAudioData(videoFileAsBuffer).then(function (decodedAudioData) {
+      let myBuffer = decodedAudioData;
+      soundSource.buffer = myBuffer;
+      soundSource.connect(offlineAudioContext.destination);
+      soundSource.start();
+      
+      offlineAudioContext.startRendering().then(function (renderedBuffer) {
+        const wav = toWav(renderedBuffer) // 这里使用了一个 audiobuffer-to-wav 的包进行了audiobuffer 转化成为 wav 格式文件。
+        url.value = URL.createObjectURL(new Blob([new Uint8Array(wav)]))
+
+      }).catch(function (err) {
+        console.log('Rendering failed: ' + err);
+      });
+    });
+  };
+}
+```
+<videoDemo/>
+
 <hr/>
 
-##### 音频可视化:
+### 音频可视化
 [参考文章](https://zhuanlan.zhihu.com/p/84202126)
 
 **前置内容补充（需要提前掌握的内容如下）：**
@@ -385,7 +425,7 @@ const compressImg = async(props: ICompressProps) => {
 ArrayBuffer对象的各种TypedArray视图，是用来向网卡、声卡之类的本机设备传送数据，所以使用本机的字节序就可以了；而DataView视图的设计目的，是用来处理网络设备传来的数据，所以大端字节序或小端字节序是可以自行设定的。
 
 ## webpack
-**关于 process**
+### 关于 process
 
 **起因：** 在设计权限控制的时候，想要设置一个开关，在本地开发的时候放开所有的权限。
 
@@ -408,14 +448,22 @@ new webpack.DefinePlugin({
 :::tip 注意点
 1. 猜测 process.env.NO_AUTH 是以字符串的形式 储存的固定值
 所以使用的时候要对整个 process.env.NO_AUTH 使用，只是打印 process 是会报错的
-
-2. 上面的例子是个特例，执行的指令为 `node ./server/index.js`，没有使用webpack，直接使用了 express 搭建的，所以可以直接在前面加变量，若是使用 webpack，需要使用 cross-env 配合 DefinePlugin 一起使用
+2. 因为使用的是mac所以可以直接添加环境变量。
 :::
 
+### Module federation
+[实现原理](https://blog.towavephone.com/module-federation-principle-research/)
+
+具体代码理解参考上诉文章，
+
+简单理解一下流程：
+1. 通过webpack打包之后的代码，通过`import`引入的模块，最终会变成 `webpack_require`。
+2. 这个函数是 webpack 打包后的一个核心函数，就是解决依赖引入。而在这其中的一个核心`installedModules`。 就是每次 require，先去缓存的 installedModules 这个缓存 map 里面看是否加载过了，如果没有加载过，那就从 modules 这个所有模块的 map 里去加载
+3. 通过 window['webpackJsonp'] 向全局数组中push 自己模块的 id 和 modules（把主应用和子应用的mpdules放在一个主chunk里面维护）
 
 ## 前端性能优化
 ### 虚拟列表
-简单版本的虚拟列表：
+**1. 简单版本的虚拟列表：**
 <vList></vList>
 
 实现方式：
@@ -429,7 +477,7 @@ new webpack.DefinePlugin({
 - `startIndex = Math.max(currIndex - bufferSize, 0)`
 - `endIndex = Math.min(currIndex + limit + bufferSize, dataCount - 1)`
 
-每行非定高版本：
+**2. 每行非定高版本：**
 <vListFin />
 
 这里因为开始时不知道每一行的高度，所以不能像简易版一样算出虚拟列表的真实高度。但是可以假设每一行的高度，
@@ -447,8 +495,125 @@ new webpack.DefinePlugin({
 }px,0)`})
 ```
 
-## 跨域问题
+**3. css属性方法**
+```css
+content-visibility: auto
+```
 
+该属性是设置了预留值的，比如下面的demo，要到 95item 左右才会发现下图的提示。
+
+<img src="../asset/display/content-visible.png">
+
+到了这个就会发现高度变成了0，这也是滚动条会出现抖动的原因。所以这里需要使用另一个属性来预设非展示区域的高度。
+
+```css
+contain-intrinsic-size: 19px;
+```
+**缺点**
+1. 这里可以发现设置的值是固定的值，所以这种方案更适合替代固定高度的虚拟列表，不适合不定高度的长列表
+2. 新属性，目前的兼容性不好
+3. 如果子元素设置了 `height` 高度超出部分高度不会为0，且 `contain-intrinsic-size`设置的值也不会生效
+4. 内存占用不会变
+5. 初步测试的情况，数据量大了，触发了重绘还是卡。
+<cssVisibleList />
+
+### long html string 渲染问题
+在使用富文本的时候，会使用 `html string` 的方式进行存储，但是会遇到 `html string`过长而导致的渲染时间长的问题。
+
+<tag name="解决思路："></tag> 
+
+将字符串截取成若干段，组成一个list。然后再批次渲染。主要是减少首次渲染的时间，保证用户能在短时间内看到页面上的内容。然后在将剩下的内容在用户注意不到的情况下 push 进去。
+
+<tag name="code 展示:" />
+
+```js
+const str = '' // 后端返回的 html string
+const pattern = /<(\S*)[^>]*>[\s\S]*?<\/(\1)>/g
+const arr = str.match(pattern) // 拆分后的结果
+
+//请求次数设置
+const queryTimes = 3
+// 每次请求的数组长度
+const count = Math.floor(arr.length / queryTimes)
+const left = document.getElementById('left') //添加到页面中 #left div下
+let remainTimes = queryTimes
+
+const getList = () => {
+  return new Promise((resolve, reject) => {
+    remainTimes--
+    const queryArr = remainTimes > 0 ? arr.splice(0, count) : arr
+    resolve(queryArr)
+  })
+}
+
+const getMoreList = async() => {
+  const arr = await getList()
+  const div = document.createElement('div')
+  div.innerHTML = arr.join('')
+
+  left.appendChild(div)
+
+  if (remainTimes > 0) {
+    setTimeout(() => {
+      getMoreList()
+    }, 1000)
+  }
+}
+
+getMoreList()
+```
+
+:::details 现有的问题
+`/<(\S*)[^>]*>[\s\S]*?<\/(\1)>/g` 实现拆分的正则匹配
+
+1. 这个只能批量匹配根节点的标签，也就是说如果只有一个根标签剩下的都在根节点下是不能实现拆分的。
+2. 对于多个标签嵌套 `<div> <div>content</div> </div>` 这种情况也是无法匹配出完整的最外层 div 标签的。
+3. 如果出现最外层单标签 如 `<img/>`， 可使用 `/<(\S*)[^>]*>[\s\S]*?<\/(\1)>|<[^>]*\/>/g` 替代。
+4. 在实现批量渲染的时候，如何判断字符串过长需要拆分，如何批量渲染上页面也是一个需要研究的问题，不然容易造成负优化。
+
+- 综上所诉，该方法只能针对部分富文本传输的 html string 处理，完整的 html标签是无效的
+:::
+
+### 浏览器渲染优化
+[参考文章](https://github.com/fi3ework/blog/issues/9)
+浏览器渲染流程 —— 像素管道
+
+<img src="../asset/display/renderCycle.png" />
+
+#### css优化
+流程中 javaScript，style，composite三个流程是一定会触发的，所以我们尽量避免 layout 和 paint 两个步骤。
+
+1. 常见的属性有：`transform`, `opacity`, `perspective`
+[css触发机制查询](https://csstriggers.com/)
+
+2. 减小选择器匹配难度（使用BEM命名方式命名）。
+3. 提升元素到新的层（但是层越多，会占用更多的内存），将动画从 CPU 转移到 GPU，来实现硬件加速。
+```css
+/* 一般两者都会写上去，因为will-change的支持不太好 */
+.moving-element {
+  will-change: transform;
+  transform: translateZ(0);
+}
+```
+4. 使用flexBox代替浮动和定位布局
+
+#### 尽量避免layout
+```js
+let boxes = document.getElmentsByClassName('.box')
+for(let i = 0; i < boxes.length; i++) {
+  let width = document.getElementById('table').width
+  boxes[i].style.width = width
+}
+```
+如上所述：当下一次循环到来时浏览器还没进重排（因为一直处于 JS 阶段） ，为了获取正确的 width ，
+浏览器就不得不立刻重新 Layout 获取一个最新值，从而失去了浏览器自身的批量更新的优化，这就是强制同步布局。
+
+为了避免强制同步布局，需要使用`requestAnimationFrame`，将width的操作推至下一帧
+
+
+
+
+## 跨域问题
 1. 产生跨域的原因：
 所谓同源是指：**域名、协议、端口相同** 如果发出去的请求不是本域的，协议官方、域名、端口，任何一个不一样，浏览器就认为是跨域的
 
@@ -494,6 +659,36 @@ new webpack.DefinePlugin({
 
 **区别：**  正向代理是代理了客户端，而反向代理则是代理服务器端。在有多台服务器分布的情况下，为了能让客户端访问到的IP地址都为同一个网站，就需要使用反向代理。
 
+## 通信 
+### BroadcastChannel
+```js
+// 1. 创建一个 BroadcastChannel 对象
+let channel = new BroadcastChannel('channel');
+// channel.name === 'channel'
 
-## 安全相关知识
-### CSRF攻击
+// 2. 发送消息到 channel
+channel.postMessage('new message')
+
+// 3. 接受 channel 发送的消息
+channel.onmessage = function (event) {
+  console.log(event.data);
+};
+
+// 4. 当完成后，断开与频道的连接
+channel.close();
+```
+
+
+
+
+
+
+
+
+
+
+
+
+map 结构的内存占用，插入性能和删除性能比 object 要好一些（待测试）
+
+手动实现迭代器，并提前退出

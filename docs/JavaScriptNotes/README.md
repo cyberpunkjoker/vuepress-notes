@@ -12,6 +12,7 @@
 - ts 学习笔记。 [typeScript](./ts.md)
 - 正则笔记记录。 [正则笔记必会](./regular.md)
 - canvas 学习。 [canvas](./canvas.md)
+- web audio api 学习。 [audioApi](./webAudioApi.md)
 
 3. 其它 - 一些有趣的项目研究
 - VueUse 代码研究。 [vueUse](./vueUse.md)
@@ -23,3 +24,11 @@
 未完成项：
 1. ffmpeg 前端版本实现
 2. RTCPeerConnection 语音通话
+
+3. how to render long html string data in reactjs component
+
+5. fiber 数据结构理解
+
+6. webassembly
+
+7. webGl

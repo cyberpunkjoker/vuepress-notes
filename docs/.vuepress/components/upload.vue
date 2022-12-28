@@ -27,7 +27,7 @@ for (const key in WavParams) {
 export default {
  data() {
    return {
-     dataList: list
+    dataList: list
    }
  },
 

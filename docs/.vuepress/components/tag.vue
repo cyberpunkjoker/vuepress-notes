@@ -23,6 +23,7 @@ export default {
 
   data() {
     return {
+      // 这里的主题色用的是 vuepress 的主题色，想要添加其它的可自行查找
       colorMap: {
         default: 'var(--c-text-accent)',
         warn: 'var(--c-warning)',
