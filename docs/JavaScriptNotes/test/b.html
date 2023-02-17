@@ -5,16 +5,70 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+
+  <style>
+    /* .root {
+      width: 100px;
+      height: 100px;
+      background: pink;
+    } */
+
+    .box {
+      margin-left: 2px;
+    }
+  </style>
+
 </head>
 <body>
-  
-  <div>b</div>
+  <div class="btn">click</div>
+  <div class="root">
+  </div>
   <script>
-    const bc = new BroadcastChannel("yahaha")
+    const item_count = 40
 
-    bc.addEventListener('message', (res) => {
-      console.log(res);
-  });
+    const root = document.querySelector('.root')
+    const btn = document.querySelector('.btn')
+
+    const createChild = () => {
+      const box = document.createElement('div')
+      box.className = 'box'
+      box.innerHTML = 'yahahahaahh'
+      return box
+    }
+
+    const createList = () => {
+      const arr = new Array(item_count).fill(1)
+      const box = document.createElement('div')
+      box.className = 'wrapper'
+      arr.forEach(i => {
+        box.appendChild(createChild())
+      })
+      root.appendChild(box)
+    }
+
+    createList()
+
+    function doubleHeight(element) {
+      var currentHeight = element.clientHeight;
+      // window.requestAnimationFrame(function () {
+      element.style.height = (currentHeight * 2) + 'px';
+      // });
+    }
+
+    const clickEvent = () => {
+      console.log('开始时间', new Date().valueOf());
+      // setTimeout(() => {
+      //   console.log('结束时间', new Date().valueOf());
+      // }, 0)
+      window.stop()
+      const elements = document.querySelectorAll('.box')
+      elements.forEach(doubleHeight)
+
+      console.log('结束时间', new Date().valueOf());
+
+    }
+
+    btn.addEventListener('click', clickEvent)
   </script>
 </body>
 </html>

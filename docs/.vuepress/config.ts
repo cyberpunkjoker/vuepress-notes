@@ -9,7 +9,8 @@ module.exports = {
   theme: defaultTheme({
     navbar: [
       { text: '首页', link: '/JavaScriptNotes' },
-      { text: 'python', link: '/PythonNotes' }
+      { text: 'python', link: '/PythonNotes' },
+      { text: 'node', link: '/NodeNotes' }
     ],
     sidebarDepth: 2,
     sidebar: 'auto',

@@ -1,5 +1,5 @@
 ## css有趣属性介绍
-1. mix-blend-mode 混合模式
+### mix-blend-mode 混合模式
 - 不仅各个图像之间要进行混合，同时还要和背景色进行混合。
 Demo: 
 ```css
@@ -28,3 +28,7 @@ div::before {
   }
 }
 ```
+
+### css vh单位理解
+1. 如果是在 iframe 中，vh的高度是以 iframe 的高度为准的。
+2. zoom 属性会影响 vh的计算。

@@ -294,6 +294,7 @@ function handleConnection(event) {
       }).catch((error) => {
         handleConnectionFailure(peerConnection, error);
       });
+  }
 }
 // ------------------------------------------------------------------------------
 // 2. 监控，在该 demo 中没有实际作用
@@ -311,3 +312,24 @@ function gotRemoteMediaStream(event) {
 }
 ```
 
+
+## css相关
+### 页面缩放
+1. 使用 `zoom`，问题是 火狐 和 Safari浏览器不支持
+2. 使用 `scale` 缩放
+使用 scale 缩放要注意两点
+- 缩放中心位置设定 `transform-origin: top left;`
+- 拖拽盒子 和 内容盒子 要分两个盒子嵌套一下
+```html
+<!-- 计算拖拽宽高的盒子 -->
+<div> 
+  <!-- 缩放内容的盒子 -->
+  <div></div>
+</div>
+```
+```js
+// 根据宽来缩放，高度会有问题。
+resizeContent.value.style.transform = `scale(${wRatio})`
+resizeContent.value.style.height = '100%'
+resizeContent.value.style.width = '100px' // 写死的宽度
+```

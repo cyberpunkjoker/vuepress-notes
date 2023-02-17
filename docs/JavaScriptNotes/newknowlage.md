@@ -109,7 +109,6 @@ class WavHead {
   - 也可以将 `videoBuffer` 中的音轨提取出来。
 :::
 
-
 下面示例为分离展示：
 
 ```ts
@@ -153,7 +152,12 @@ const changeFile = (e: InputEvent) => {
 **前置内容补充（需要提前掌握的内容如下）：**
 1. [webAudio](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Audio_API) 目的：如何获取音频数据。
 2. 可视化图形展示：两种方式 canvas or webGL。
-
+3. 关于`MediaElementAudioSourceNode`: 接口代表着某个由 HTML `<audio>` 或 `<video>` 元素所组成的音频源。该接口作为 AudioNode 音源节点。
+```js
+const context = new(window.AudioContext || window.webkitAudioContext)() as AudioContext;
+// 这里 createMediaElementSource 能解析的资源 不只是音频，视频也可以
+let source = context.createMediaElementSource(audio);
+```
 **实现步骤：**
 1. **是什么？**
 
@@ -463,6 +467,9 @@ new webpack.DefinePlugin({
 
 ## 前端性能优化
 ### 虚拟列表
+
+[参考文章](https://mp.weixin.qq.com/s?__biz=Mzk0MDMwMzQyOA==&mid=2247490716&idx=1&sn=f91da81d8173528f9a038f2b7e68ebf2&source=41#wechat_redirect)
+
 **1. 简单版本的虚拟列表：**
 <vList></vList>
 
@@ -492,10 +499,12 @@ new webpack.DefinePlugin({
   startIndex >= 1
     ? cachedPositions[rect.startIndex - 1].bottom
     : 0
-}px,0)`})
+}px,0)})`
 ```
+<hr/>
 
 **3. css属性方法**
+(文章)[https://www.cnblogs.com/coco1s/p/16373817.html]
 ```css
 content-visibility: auto
 ```
@@ -514,8 +523,52 @@ contain-intrinsic-size: 19px;
 2. 新属性，目前的兼容性不好
 3. 如果子元素设置了 `height` 高度超出部分高度不会为0，且 `contain-intrinsic-size`设置的值也不会生效
 4. 内存占用不会变
-5. 初步测试的情况，数据量大了，触发了重绘还是卡。
+5. 初步测试的情况，数据量大了，触发了重绘还是卡。(更适合无缩放操作的页面)
 <cssVisibleList />
+
+**4. IntersectionObserver**
+
+虚拟列表的本质是监控用户是否到了视窗中，然后只加载在视窗中的内容。而 `IntersectionObserver`可以实现视窗的监听
+
+<tag name="学前问题？" colorType="info"/> 
+
+1. 但是不使用 `getBoundingClientRect` 获取页面相关位置信息。如何隐藏可示区上面的内容？
+2. 假的滚动条是如何设置的？
+
+<tag name="api学习" colorType="info"/>
+
+```js
+// callback是可见性变化时的回调函数，option是配置对象（该参数可选）
+const io = new IntersectionObserver(callback, option);
+
+// ----------------------监听器代码-------------------------
+// 开始观察
+io.observe(document.getElementById('example'));
+// 停止观察
+io.unobserve(element);
+// 关闭观察器
+io.disconnect();
+
+```
+**监听器返回值详解如下：**
+- time：可见性发生变化的时间，是一个高精度时间戳，单位为毫秒
+- target：被观察的目标元素，是一个 DOM 节点对象
+- rootBounds：根元素的矩形区域的信息，getBoundingClientRect()方法的返回值，如果没有根元素（即直接相对于视口滚动），则返回null
+- boundingClientRect：目标元素的矩形区域的信息
+- intersectionRect：目标元素与视口（或根元素）的交叉区域的信息
+- intersectionRatio：目标元素的可见比例，即intersectionRect占boundingClientRect的比例，完全可见时为1，完全不可见时小于等于0
+- isIntersecting: boolean 判断是否可视。
+
+在使用的时候有两点需要注意一下:
+1. 想使用 `io.observe` 监听多个节点时要一个一个监听
+2. 一般使用 isIntersectiong 的true 和 false 来判定是否在可视区内
+
+除了虚拟列表以外，`isIntersectiong`很适合做 **1. 触底刷新** 和 **2.用户停留埋点**
+
+https://stackblitz.com/github/F-one-1/vue3-virtual-scroll-list?file=src%2Fcomponents%2FlistDOM.vue
+
+<Observerlist />
+
 
 ### long html string 渲染问题
 在使用富文本的时候，会使用 `html string` 的方式进行存储，但是会遇到 `html string`过长而导致的渲染时间长的问题。
@@ -554,10 +607,10 @@ const getMoreList = async() => {
   left.appendChild(div)
 
   if (remainTimes > 0) {
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       getMoreList()
-    }, 1000)
-  }
+    })
+}
 }
 
 getMoreList()
@@ -609,7 +662,6 @@ for(let i = 0; i < boxes.length; i++) {
 浏览器就不得不立刻重新 Layout 获取一个最新值，从而失去了浏览器自身的批量更新的优化，这就是强制同步布局。
 
 为了避免强制同步布局，需要使用`requestAnimationFrame`，将width的操作推至下一帧
-
 
 
 

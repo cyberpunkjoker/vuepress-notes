@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <canvas id="mycanvas"></canvas>
+
+  <script>
+    // 1. 初始化 webGl 上下文
+    const canvas = document.getElementById('mycanvas')
+    const gl = canvas.getContext('webgl2')
+
+    // 2. 编译顶点着色器
+    const vertexShader = gl.createShader(gl.VERTEX_SHADER)
+    const vsSource = `
+      attribute vec4 a_position;
+
+      void main() {
+        gl_Position = a_position;
+      }
+    `
+    gl.shaderSource(vertexShader, vsSource)
+    gl.compileShader(vertexShader)
+
+    // 3. 编译片段着色器
+    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
+    const fsSource = `
+      void main() {
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+      }
+    `
+    gl.shaderSource(fragmentShader, fsSource)
+    gl.compileShader(fragmentShader)
+
+    // 4. 创建着色器程序
+    const shaderProgram = gl.createProgram()
+    gl.attachShader(shaderProgram, vertexShader)
+    gl.attachShader(shaderProgram, fragmentShader)
+    gl.linkProgram(shaderProgram)
+    gl.useProgram(shaderProgram)
+    
+    // 5. 写入数据到缓冲区
+    const aPositionLocation = gl.getAttribLocation(shaderProgram, 'a_position')
+    // 5.1 创建缓存区
+    const buffer = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+    // 5.2 写入数据到缓存区
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([
+        -0.5, 0.0, 0.0,
+        0.5, 0.0, 0.0,
+      ]),
+      gl.STATIC_DRAW
+    )
+    gl.vertexAttribPointer(aPositionLocation, 3, gl.FLOAT, false, 0, 0)
+    gl.enableVertexAttribArray(aPositionLocation)
+
+    // 清理画布
+    gl.clearColor(0, 0, 0, 1)
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+    //开始绘制图形
+    gl.drawArrays(gl.LINE_STRIP, 0, 2)
+  </script>
+</body>
+</html>

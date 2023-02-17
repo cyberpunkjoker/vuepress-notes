@@ -1,6 +1,6 @@
 <template>
   <div ref="resizeWrap" class="resize-container">
-    <div ref="resizeContent">
+    <div ref="resizeContent" class="resize-text">
       <slot name="content"></slot>
     </div>
     <div 
@@ -39,14 +39,16 @@
     resizeWrap.value.style.height = boxH + pointY + 'px'
     resizeWrap.value.style.width = boxW + pointX + 'px'
     
-    zoomCtx(boxW)
+    zoomCtx(boxW + pointX, boxH + pointY)
   }
 
-  const zoomCtx = (w: number) => {
-    const ratio = w / 100
+  const zoomCtx = (w: number, h: number) => {
+    const wRatio = w / 100
+    const hRatio = h / 100
     // 缩放字体大小功能
-    // resizeContent.value.style.fontSize = `${ratio * 14}px`
-    resizeContent.value.style.zoom = ratio
+    // resizeContent.value.style.zoom = hRatio // 功能缺陷 --- 火狐浏览器不支持 zoom 属性
+    resizeContent.value.style.transform = `scale(${wRatio})`
+    resizeContent.value.style.height = '100%'
   }
 </script>
 
@@ -64,6 +66,12 @@
     height: 100px;
     border: 1px solid #ccc;
     overflow: hidden;
+    .resize-text {
+      width: 100px;
+      height: 100px;
+      transform-origin: top left;
+    }
+
     .resize-icon {
       position: absolute;
       bottom: -8px;
