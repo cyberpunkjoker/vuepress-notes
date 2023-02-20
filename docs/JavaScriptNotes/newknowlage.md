@@ -627,6 +627,25 @@ getMoreList()
 - 综上所诉，该方法只能针对部分富文本传输的 html string 处理，完整的 html标签是无效的
 :::
 
+<tag name="2023.2.20 更新"/>
+如上诉所说：因为只能匹配到最外层标签，遇到了一个标签过大，导致渲染时间依然过长的问题出现。
+<br />
+开始想要找到在渲染过程中终止的方法，并提示跳出渲染。但是不行，因为渲染是浏览器的主线程。运行时，任务都会在渲染队列后面排队。哪怕是使用web worker 也会在后面排队
+<br />
+
+**解决思路:**知道了以上的内容后，有一点可以明确。不能在渲染中做操作，只能在渲染前，或者说自己控制一帧一帧渲染。没错这其实就是react fiber做的东西，所以思路到这就很明确了，直接将html string 转化成react Element，程序运行到这的时候自己就会走 fiber 算法对渲染进行优化处理。这里可以使用第三方的插件实现 `html-react-parser`(后面可以看一下插件实现的原理)
+<br/>
+
+ 测试11m数据发现，三种方法
+ 1. innerHTML
+ 2. dangerouslySetInnerHTML
+ 3. 第三方插件（htmr，html-react-parser）
+
+<img src="../asset/display/longString.png"/>
+
+发现innerHTML 的耗时反而是最短的，基本比 dangerouslySetInnerHTML 少了几百ms，第三方插件 中创建fiber 的过程耗时很长 基本都要 7s 左右，而插件函数执行也是要耗时的htmr 优化较差，需执行11s 左右，html-react-parser则需要1.6s 所以这两步执行的时间基本上就是比 dangerouslySetInnerHTML 多的时间。 -->
+
+
 ### 浏览器渲染优化
 [参考文章](https://github.com/fi3ework/blog/issues/9)
 浏览器渲染流程 —— 像素管道
