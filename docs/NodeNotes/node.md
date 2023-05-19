@@ -181,4 +181,202 @@ server.listen(port, hostname, () => {
 ### Buffer 缓冲区
 用于处理二进制数据的特殊数据类型，它可以用来存储任意类型的数据，如字符串、图片、视频等。它可以用来处理网络数据流、处理文件、实现数据加密等
 
+**？1. 如何使用二进制读取文件？**
+1. 先查询对应文件格式的文件头信息。
+2. 使用 buffer 获取前面几位。通过对比确认是什么文件。
+读取文件头，代码展示：⬇️
+```ts
+const bufLen = 10
+
+function getFileHeader(filePath: string) { 
+  const fd = fs.openSync(filePath, 'r');
+  const buffer = Buffer.alloc(bufLen);
+  fs.readSync(fd, buffer, 0, bufLen, 0);
+  fs.closeSync(fd); 
+  return buffer; 
+} 
+// 解析文件头信息 
+function parseFileHeader(heade: Buffer) {
+
+  console.log('header', header.toString());
+  
+  if (header[0] === 0x89 && header[1] === 0x50 && header[2] === 0x4E && header[3] === 0x47) { 
+    return 'png'; 
+  } else if (header[0] === 0xFF && header[1] === 0xD8) { 
+    return 'jpg'; 
+  } else if (header[0] === 0x47 && header[1] === 0x49 && header[2] === 0x46) { 
+    return 'gif'; 
+  } else if (header[0] === 0xFF && header[1] === 0xD8 && header[6] === 0x4A && header[7] === 0x46 && header[8] === 0x49 && header[9] === 0x46 && header[10] === 0x00) { 
+    return 'jpeg'; 
+  } else { return null; } 
+} 
+```
+
+**？2. 如何实现文件格式的转换？**
+
+问题记录一下：
+- 在获取`PNG`文件的时候 第一位 `0x89 -> 137` 。第一个字节0x89超出了ASCII字符的范围，这是为了避免某些软件将PNG文件当做文本文件来处理。
+
+
+编码类型相关：
+一般常用的编码类型有：ASCII， UTF-8，UTF-16，Unicode 这几种，
+
+中国内常用的GBK，GB232，BIG-5 不支持使用。
+
+### Stream
+流的作用就是传递数据，读写方式是把文件内容读入内存中，然后再写入文件。当遇到大文件的时候就需要把文件拆成小块，一块一块的运输。
+
+
+## 跨域问题
+某些请求不会触发 CORS 预检请求。在废弃的 CORS 规范中称这样的请求为简单请求，但是目前的 Fetch 规范（CORS 的现行定义规范）中不再使用这个词语。
+
+对于一些复杂请求 会预先发起一个 option 请求，然后根据服务器的响应，判断是否允许跨域。
+
+跨域的一些理解可以看这篇
+(1)[https://juejin.cn/post/7045070446848376869]
+(2)[https://cloud.tencent.com/developer/article/2009296]
+
+主要需要明确两点，
+1. 浏览器拦截的是返回结果不是请求（请求还是发出去了的）
+2. 复杂请求和简单请求的处理是不一样的，复杂需要先 预请求 一次判断（option）
+
+
+## HTTP
+**HTTP头部参数包括：（部分）**
+- Content-Type，用于指定响应的内容类型；
+- Content-Length，用于指定响应的内容长度；
+- Cache-Control，用于指定客户端缓存的策略；
+- Connection，用于指定客户端与服务器之间的连接状态；
+- Date，用于指定响应的发送时间；
+- Expires，用于指定响应的过期时间；
+- Server，用于指定服务器的名称；
+- Set-Cookie，用于指定客户端的Cookie；
+- Transfer-Encoding，用于指定响应的传输编码方式；
+- Vary，用于指定客户端可以接受的响应类型；
+- X-Powered-By，用于指定服务器使用的技术。
+
+**MIME 类型:（部分）**
+- text/plain，用于指定纯文本格式；
+- text/html，用于指定HTML格式；
+- application/json，用于指定JSON格式；
+- application/xml，用于指定XML格式；
+- image/jpeg，用于指定JPEG图片格式；
+- image/png，用于指定PNG图片格式；
+- audio/mpeg，用于指定MPEG音频格式；
+- video/mp4，用于指定MP4视频格式；
+- application/octet-stream，用于指定任意二进制格式。
+
+
+1. 比如你的网站从 HTTP 升级到了 HTTPS 了，以前的站点再也不用了，应当返回301，这个时候浏览器默认会做缓存优化，在第二次访问的时候自动访问重定向的那个地址。
+而如果只是暂时不可用，那么直接返回302即可，和301不同的是，浏览器并不会做缓存优化。
+
+
+
+### Accept
+2. HTTP 从MIME type取了一部分来标记报文 body 部分的数据类型，这些类型体现在Content-Type这个字段，当然这是针对于发送端而言，接收端想要收到特定类型的数据，也可以用Accept字段。
+具体而言，这两个字段的取值可以分为下面几类:
+
+text： text/html, text/plain, text/css 等
+image: image/gif, image/jpeg, image/png 等
+audio/video: audio/mpeg, video/mp4 等
+application: application/json, application/javascript, application/pdf, application/octet-stream
+
+
+
+Content-Type：通常以MIME类型的形式表示，指定请求或响应中包含的实体的媒体类型。帮助接收方解析数据。
+
+
+发送端 
+1. Content-Encoding: gzip                  压缩方式
+2. Content-Language: zh-CN, zh, en         支持语言
+3. Content-Type: text/html; charset=utf-8  字符集
+
+接收端 
+1. Accept-Encoding: gzip
+2. Accept-Language: zh-CN, zh, en
+3. Accept-Charset: charset=utf-8
+
+
+
+定长与不定长
+Content-Length: 10  限制长度，如果超出长度页面会无法访问
+Transfer-Encoding: chunked 不定长
+
+
+http中处理表单提交中不同类型对应的后端解析情况：
+
+1. application/x-www-form-urlencoded: name=yahah&age=109
+2. multipart/form-data: 
+```
+------WebKitFormBoundaryBIqPugThGUAZ0QTW
+Content-Disposition: form-data; name="name"
+
+yahah
+------WebKitFormBoundaryBIqPugThGUAZ0QTW
+Content-Disposition: form-data; name="age"
+
+109
+------WebKitFormBoundaryBIqPugThGUAZ0QTW--
+```
+3. application/json: {"name":"yahah","age":109}
+
+
+### cookie
+```ini
+// 请求头
+Cookie: a=xxx;b=xxx
+// 响应头
+Set-Cookie: a=xxx
+set-Cookie: b=xxx
+```
+
+cookie 的生命周期：
+Expires: 过期时间 
+Max-Age: 用的是一段时间间隔，单位是秒，从浏览器收到报文开始计算
+
+cookie 的作用域：
+Domain: 指定了 Cookie 可以被发送到哪些域名
+path: 可以被发送到哪些路径下的 URL
+
+```js
+// 在 www.example.com 中设置一个 Cookie
+res.setHeader('Set-Cookie', 'user=123; domain=.example.com; path=/api; Max-Age=3600');
+```
+
+cookie 安全相关：
+Secure：只能通过 HTTPS 传输cookie
+HttpOnly：只能通过 HTTP 协议传输，不能使用 JS 访问
+SameSite：可以设置 Strict，Lax，None
+- a. 在Strict模式下，浏览器完全禁止第三方请求携带Cookie。比如请求sanyuan.com网站只能在sanyuan.com域名当中请求才能携带 Cookie，在其他网站请求都不能。
+- b. 在Lax模式，就宽松一点了，但是只能在 get 方法提交表单况或者a 标签发送 get 请求的情况下可以携带 Cookie，其他情况均不能。
+- c. 在None模式下，也就是默认模式，请求会自动携带上 Cookie。
+
+
+cookie 的缺点：
+1. 容量小，只有4KB
+2. 性能有问题，域名下的所有地址的请求都会带上完整的 cookie。但是可以通过 Domain 和 path指定作用域
+3. 安全问题，在 非httpOnly 的情况下，cookie信息可以通过 JS脚本读取。
+
+
+### 缓存相关
+Cache-Control: private 或者 public
+s-maxage: 限定了缓存在代理服务器中可以存放多久
+
+
+```
+Cache-Control: public, max-age=1000, s-maxage=2000
+```
+翻译一下的意思是：响应是允许代理服务器缓存的，客户端缓存过期了到代理中拿，并且在客户端的缓存时间为 1000 秒，在代理服务器中的缓存时间为 2000 s。
+
+
+**强制缓存：**
+expires: 服务端返回的数据到期时间
+cache-control: 
+- private：客户端可以缓存 
+- public：客户端和代理服务器都可以缓存 
+- max-age=t：缓存内容将在t秒后失效 
+- no-cache：需要使用协商缓存来验证缓存数据 
+- no-store：所有内容都不会缓存。
+Etag: 通过此字段告诉浏览器当前资源在服务器生成的唯一标识
+
 

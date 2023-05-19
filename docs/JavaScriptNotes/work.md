@@ -11,6 +11,12 @@
 
 
 ## 平时遇到的一些笔记📒
+### 知识点
+<tag name="主要为一些概念相关的知识:"/>
+
+1. **什么是 CSP**
+
+[文章推荐](https://juejin.cn/post/7067904246212984840)
 ### js笔记相关
 1. **判断有无传参，并对传参为 undefined 特殊处理**
 ```js
@@ -333,3 +339,174 @@ resizeContent.value.style.transform = `scale(${wRatio})`
 resizeContent.value.style.height = '100%'
 resizeContent.value.style.width = '100px' // 写死的宽度
 ```
+
+
+## 埋点记录
+曝光埋点-可以通过一下方式来埋点。
+
+1. IntersectionObserver 来监听当前页面的元素进而进行埋点。
+**风险点：**
+这里需要注意的一点是，如何获取埋点信息：尤其是对于循环出来的信息来说获取到某一个节点的单独信息是不好获取的，
+因为我是在最外层去监听的。可以再获取到数据的时候把数据放到节点上。（但是这样做会有信息泄漏，不安全）
+```js
+class ExposedPointObserve {
+  io = null;          // IntersectionObserver 实例
+  isOneShot = true;   // 是否只记录一次曝光埋点
+  ioSelectName = '';  // 查重dom节点，选择器名称
+  callback = null;    // 元素出现时的，回调函数
+
+  constructor(props) {
+    const { isOneShot, ioSelectName, cb } = props
+    this.isOneShot = isOneShot
+    this.ioSelectName = ioSelectName
+    this.callback = cb
+    this.initIo()
+  }
+
+  initIo = () => {
+    this.io = new IntersectionObserver((entries) => {
+      entries.forEach(item => {
+        if (item.isIntersecting) {
+          this.callback(item)
+          item.target.setAttribute('data-exposed', true)
+          this.isOneShot && this.removeObserveEl(item.target)
+        }
+      })
+    })
+  }
+
+  addNewObserve = () => {
+    const els = document.querySelectorAll(this.ioSelectName)
+    els.forEach(dom => {
+      if (dom.getAttribute('data-exposed') !== 'true') {
+        this.io.observe(dom)
+      }
+    })
+  }
+
+  removeObserveEl = (el) => {
+    this.io.unobserve(el)
+  }
+
+  clearAll = () => {
+    this.io.disconnect()
+  }
+}
+```
+
+2. MutationObserver 监听节点变化来埋点
+
+如下可以直接通过父节点观察 子节点 的变化情况。相同点依旧是，会有信息泄漏的风险。
+
+```js
+const observer = new MutationObserver((mutations) => {
+  // 或者使用 requestAnimationFrame
+  // requestAnimationFrame(() => {
+  // })
+
+  setTimeout(() => { // 将埋点事件推入下个事件循环，不影响主流程
+    mutations.forEach(mutation => {
+      mutation.addedNodes.forEach((node) => {
+        console.log( node.getAttribute('list-idx') ); // 根据节点层级看这里是否需要加入 节点递归
+      })
+    })
+  }, 0);
+})
+
+const config = {
+  subtree: true,
+  attributes: false, 
+  characterData: false,
+  childList: true,
+}
+
+observer.observe(list, config);
+```
+
+3. Object.defineProperty
+
+
+
+
+## vim
+
+:%!xxd 以16进制方式，打开文件
+
+
+## js判断网络断开
+
+```ts
+/**
+ * description 判断是否断网
+ */
+interface ICheckNetProps {
+  getOfflineSts: (val: boolean) => any;
+}
+
+export default class CheckNetStatus {
+  connection: any;
+  connctionSts: boolean;
+  offlineSts: boolean;
+  callback: (val: boolean) => any
+  constructor (props: ICheckNetProps) {
+    const { getOfflineSts } = props
+
+    this.callback = getOfflineSts
+    this.offlineSts = false
+    this.offlineStsChange()
+    this.canUseConnction()
+
+    if (this.connctionSts) {
+      this.useConnction()
+    } else {
+      this.useOffline()
+    }
+  }
+
+  // 监听 offlineSts 值的变化
+  offlineStsChange = () => {
+    Object.defineProperty(this, 'offlineSts', {
+      set: function(newValue) {
+        if (newValue === true) {
+          this.callback(newValue);
+        }
+      },
+      get: function() {
+        return this.offlineSts;
+      }
+    });
+  }
+
+  canUseConnction = () => {
+    this.connection = (navigator as any)?.connection
+    this.connctionSts = this.connection ? true : false
+  }
+
+  connectionChange = () => {
+    const { rtt } = this.connection || {}
+    if (rtt === 0) {
+      this.offlineSts = true
+    }
+  }
+
+  offlineChange = () => this.offlineSts = true
+
+  useConnction = () => this.connection.addEventListener('change', this.connectionChange)
+
+  useOffline = () => window.addEventListener('offline', this.offlineChange)
+
+  removeAll = () => {
+    if (this.connctionSts) {
+      this.connection.removeEventListener('change', this.connectionChange)
+    } else {
+      window.removeEventListener('offline', this.offlineChange)
+    }
+    this.connctionSts = false
+  }
+
+}
+```
+
+
+
+实时转译

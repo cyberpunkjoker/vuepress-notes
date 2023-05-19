@@ -37,33 +37,3 @@ Node.js可以通过多种方式实现并发，其中包括：
 9. 学习HTTP长连接，包括HTTP/1.1长连接、HTTP/2长连接等；
 10. 学习HTTP2，包括HTTP2的特性、HTTP2的优势等。
 :::
-
-
-
-
-http模块最主要是了解http协议
-
-HTTP头部参数包括：
-Content-Type，用于指定响应的内容类型；
-Content-Length，用于指定响应的内容长度；
-Cache-Control，用于指定客户端缓存的策略；
-Connection，用于指定客户端与服务器之间的连接状态；
-Date，用于指定响应的发送时间；
-Expires，用于指定响应的过期时间；
-Server，用于指定服务器的名称；
-Set-Cookie，用于指定客户端的Cookie；
-Transfer-Encoding，用于指定响应的传输编码方式；
-Vary，用于指定客户端可以接受的响应类型；
-X-Powered-By，用于指定服务器使用的技术。
-
-
-
-text/plain，用于指定纯文本格式；
-text/html，用于指定HTML格式；
-application/json，用于指定JSON格式；
-application/xml，用于指定XML格式；
-image/jpeg，用于指定JPEG图片格式；
-image/png，用于指定PNG图片格式；
-audio/mpeg，用于指定MPEG音频格式；
-video/mp4，用于指定MP4视频格式；
-application/octet-stream，用于指定任意二进制格式。

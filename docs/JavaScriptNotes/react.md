@@ -23,6 +23,10 @@ const memoSum = useMemo(() => {
 3. useCallback
 可以避免子组件的重复渲染。useCallback 是为了**避免由于回调函数引用变动（调用父组件的方法，如果设计的数据和子组件无关，则不更新子组件）**，所导致的子组件非必要重新渲染。（这个子组件有两个前提：首先是接收回调函数作为 props，其次是被 React.memo 所包裹。）
 
+
+## react 一些使用理解
+
+
 ## react 坑->理解
 ### 关于组件注销的问题
 
@@ -92,3 +96,7 @@ function lazyImportComp(compPath?: string) {
   <Route path={cur.path} exact key={cur.path} component={lazyImportComp(cur.component)} />
 </Suspense>
 ```
+
+
+### fiber 理解
+

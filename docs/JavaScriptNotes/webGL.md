@@ -157,6 +157,9 @@ setGLValue(program)
 ```
 
 基础功能简单了解一下之后，使用第三方库 three.js 了解一下
-
 ### Three.js
+
+
+### 矩阵相关知识
+https://juejin.cn/post/7217100608776224829
 
