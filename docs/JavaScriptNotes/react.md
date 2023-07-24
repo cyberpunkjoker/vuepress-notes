@@ -100,3 +100,52 @@ function lazyImportComp(compPath?: string) {
 
 ### fiber 理解
 
+
+
+
+## 前端路由
+1. hash 路由 主要是使用的 `hashchange` 监听哈希路由的变化 
+
+```js
+window.addEventListener('hashchange', changeView)
+
+function changeView() {
+  
+  switch (location.hash) {
+    case '#/home':
+      routeView.innerHTML = 'home'
+      break;
+    case '#/about':
+      routeView.innerHTML = 'about'
+      break;
+  }
+}
+```
+
+2. history 路由主要是使用 `history.pushState` 推入，然后再使用 `popstate`监听变化
+
+```js
+window.addEventListener('popstate', changeView)
+
+event.addEventListener('click', (e) => {
+    if(e.target.nodeName === 'A'){
+        e.preventDefault()
+
+        history.pushState(null, "", e.target.getAttribute('href'))
+
+        changeView()
+    }
+
+})
+
+function changeView() {
+    switch (location.pathname) {
+        case '/home':
+            routeView.innerHTML = 'home'
+            break;
+        case '/about':
+            routeView.innerHTML = 'about'
+            break;
+    }
+}
+```

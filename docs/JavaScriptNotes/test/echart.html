@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <style>
+
+      .cub {
+        width: 30rem;
+        height: 30rem;
+        background: linear-gradient(
+          45deg,
+          rgb(60, 200, 100) 0%,
+          var(--cub__color) var(--cub__gradient--position)
+        );
+        transition: --cub__color 0.5s ease, --cub__gradient--position 1s 0.5s ease;
+      }
+
+      .cub:hover {
+        --cub__color: #350202;
+        --cub__gradient--position: 0%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cub"></div>
+    <script>
+      if (CSS.registerProperty) {
+        CSS.registerProperty({
+          name: "--cub__color",
+          syntax: "<color>",
+          initialValue: "rgba(9,9,121,1)",
+          inherits: false,
+        });
+
+        CSS.registerProperty({
+          name: "--cub__gradient--position",
+          syntax: "<percentage>",
+          initialValue: "60%",
+          inherits: false,
+        });
+      }
+    </script>
+  </body>
+</html>

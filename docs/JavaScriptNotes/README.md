@@ -42,3 +42,8 @@
 2. how to render long html string data in reactjs component (展示解决目前的简易版本)
 
 3. webassembly （需其它语言支持，暂时搁浅）
+
+
+
+项目问题，尝试
+埋点 table 里面的按钮

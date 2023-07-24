@@ -508,5 +508,64 @@ export default class CheckNetStatus {
 ```
 
 
+## 移动端问题记录
+
+### 关于移动端键盘弹起的问题记录
+- 在移动端，如果遇到 input textarea，或者css设置了 contenteditable 属性时。
+- 当触发 `focusin` 的时候会自动弹起 软键盘
+
+**这里弹起的操作中，ios 和 安卓的处理方式不太一样。**
+
+- **安卓：**键盘弹起，webview 高度会发生变化，高度为可视区高度（原高度减去软键盘高度），除了因为页面内容被撑开可以产生滚动，webview本身不能滚动。
+- **iOS：**键盘弹起，webview并没有被压缩，或者说高度（height）没有改变，只是页面（webview）整体往上滚了，且最大滚动高度（scrollTop）为软键盘高度。
+
+在一般正常的聊天功能中其实这也没有什么问题，两种处理方式都不会挡住内容（当然也要看情况处理）。但在我遇到的业务场景中就会出现一点问题。直播页面中，在`ios`中直播画面会被顶上去看不全，而安卓正常展示。
+1. 原因：处理方式不一样，因为直播的video 标签设置了 height：100%。所以安卓中会缩放处理。而ios中则会直接讲页面往上滚动。
+2. 处理：想法是，能不能用 `iOS` 模拟安卓的处理方式。
+3. 实现步骤：
+ - 通过`scroll`事件获取到键盘高度
+ - 将可视区高度减小为 100% - 键盘高度 
+ - 将顶上去的页面拉下来
+
+```js
+window.addEventListener('scroll', () => { this.keyboardHeight = document.documentElement.scrollTop })
+
+if (isIos) {
+  document.body.style.height = `calc(100% - ${this.keyboardHeight}px)`
+  window.scrollTo(0, 0);
+}
+```
+
+**2023.07.03 ---- 更新**
+经过测试之后，发现按照上诉方式实现页面会有明显的抖动效果。
+故修改方案为 transform 向下移动。代码如下， 在 focus 时执行（但是在最后还是体验不太好，因为它有一个很明显顶上去的动作，因为弹键盘的动作需要耗时，且耗时时间未知）
+<br />
+目前来看，不借助原生的支持，没有更好的解决方案，先将该方案记录一下，也有些不错的写法。
+
+```js
+const callback = () => {
+  const { top = 0 } = bgAnchorElem.getBoundingClientRect();
+  const offsetY = Math.abs(top);
+
+  if (offsetY >= 100 && offsetY <= windowHeight * 2 / 3) {
+    bgAnchorElem.style.transform = `translateY(${-top}px`;
+  }
+};
+
+for (let cb of new Array(2).fill(callback)) {
+  await delay(150);
+
+  cb?.();
+}
+```
+1. 分两次触发下拉动作，避免单次等待时间太长
+2. 避免一次 150ms 不能将键盘完全弹出
+3. 做了差值 100px 的判断，可以避免过小幅度的抖动（也就是第一次获取太小，一次性都交给第二次）
+4. 这里使用了 2次 是因为，测试效果来看，三次及以上抖动效果就会很明显了
+
+
+### webview
+
+
 
 实时转译
