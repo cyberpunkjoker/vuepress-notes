@@ -34,6 +34,40 @@ div::before {
 2. zoom 属性会影响 vh的计算。
 
 
-
 contenteditable
+
+
+## 一些实用布局展示
+### 要求如图
+
+<img src="../asset/display/css001.png"/>
+
+```css
+.box {
+  display: flex;
+  justify-content: space-between;
+}
+.empty-box {
+  width: 54px;
+  height: 2px;
+  min-width: 54px;
+}
+.list {
+  display: flex;
+  flex-wrap: wrap;
+}
+```
+```html
+<div class="box">
+  <div class="label">label:</div>
+  <div class="empty-box"></div>
+  <div class="list">
+    <p>1232321313123</p>
+    <p>2222222222222</p>
+    <p>3333333333333</p>
+    <p>4444444444444</p>
+    <p>5555555555555</p>
+  </div>
+</div>
+```
 

@@ -19,9 +19,14 @@ babel 如何转译 ts 文件
 
 cross-env -- 设置环境变量
 webpack-dev-server -- 本地服务器
-
 tree-shaking
 
 
 
 mac nvm ---- https://www.jianshu.com/p/cb5265434d91
+
+
+
+<!-- 2023.08.21 webpack 配置react 项目思路以及问题整理 -->
+dependencies 和 devDependencies 的区别
+- 如果你输入 npm install --production 指令，就只会安装 dependencies 目录下的依赖
